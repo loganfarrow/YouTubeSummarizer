@@ -1,6 +1,6 @@
 {
   "name": "video-summarizer-extension",
-  "version": "5.0.4",
+  "version": "0.0.1",
   "description": "A chrome extension that provides ai video summaries for popular video sharing websites",
   "repository": {
     "type": "git",
@@ -12,8 +12,6 @@
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^7.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
