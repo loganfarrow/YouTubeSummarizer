@@ -35,13 +35,16 @@ app.use((err, req, res, next) => {
 });
 
 // connect to db
-mongoose.connect(process.env.MONG_URI)
-    .then(() => {
-        console.log('connected to mongodb atlas')
-    })
-    .catch((error) => {
-        console.log('error connecting to mongodb atlas: ', error)
-    })
+mongoose.connect(process.env.MONG_URI, {
+    useNewUrlParser: true, // TODO are these two params needed?
+    useUnifiedTopology: true
+})
+.then(() => {
+    console.log('connected to mongodb atlas')
+})
+.catch((error) => {
+    console.log('error connecting to mongodb atlas: ', error)
+})
 
 // listen for request to backend
 app.listen(process.env.PORT, () => {

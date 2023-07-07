@@ -44,6 +44,8 @@ router.delete('/:userId(\\d+)/deleteSummary/:summaryId(\\d+)', (req, res) => {
 
 // create new summary
 router.post('/:userId(\\d+)/createSummary', (req, res) => {
+    // const {name, summary, etc} = req.body
+
     res.status(200).json({ message: 'hello world' })
 })
 
