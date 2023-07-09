@@ -9,6 +9,18 @@ const summaryRoutes = require('./routes/summaries')
 
 const app = express()
 
+// connect to AtlasDB
+mongoose.connect(process.env.MONG_URI, {
+    useNewUrlParser: true, // TODO are these two params needed?
+    useUnifiedTopology: true
+})
+.then(() => {
+    console.log('connected to mongodb atlas')
+})
+.catch((error) => {
+    console.log('error connecting to mongodb atlas: ', error)
+})
+
 // define middleware here (middleware is called on requests in the order it's defined)
 app.use(express.json())
 
@@ -33,18 +45,6 @@ app.use((err, req, res, next) => {
   
     res.status(500).json({ error: 'Internal Server Error' });
 });
-
-// connect to db
-mongoose.connect(process.env.MONG_URI, {
-    useNewUrlParser: true, // TODO are these two params needed?
-    useUnifiedTopology: true
-})
-.then(() => {
-    console.log('connected to mongodb atlas')
-})
-.catch((error) => {
-    console.log('error connecting to mongodb atlas: ', error)
-})
 
 // listen for request to backend
 app.listen(process.env.PORT, () => {

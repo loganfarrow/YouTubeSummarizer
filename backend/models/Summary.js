@@ -30,3 +30,7 @@ const summarySchema = new mongoose.Schema({
         ref: 'User',
     }
 })
+
+let summaryModel = mongoose.model('Summary', summarySchema)
+
+export default summaryModel
