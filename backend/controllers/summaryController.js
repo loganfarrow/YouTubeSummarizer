@@ -1,4 +1,3 @@
-const e = require('express')
 const Summary = require('../models/Summary')
 const User = require('../models/User')
 
@@ -87,7 +86,6 @@ exports.deleteSummary = async (req, res) => {
 exports.createSummary = async (req, res) => {
     const { title, summary, options } = req.body
     const userId = req.params.userId
-    const dateCreated = new Date()
 
     let user = null
     try {
@@ -110,7 +108,6 @@ exports.createSummary = async (req, res) => {
             title: title,
             summary: summary,
             options: optionsJSON,
-            dateCreated: dateCreated,
             user: user
         })
         savedSummary = await newSummary.save()
