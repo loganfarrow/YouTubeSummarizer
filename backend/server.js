@@ -2,6 +2,7 @@
 require('dotenv').config()
 
 const express = require('express')
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
 
 const authenticationRoutes = require('./routes/authentication')
@@ -9,8 +10,21 @@ const summaryRoutes = require('./routes/summaries')
 
 const app = express()
 
+// connect to AtlasDB
+mongoose.connect(process.env.MONG_URI, {
+    useNewUrlParser: true, // TODO are these two params needed?
+    useUnifiedTopology: true
+})
+    .then(() => {
+        console.log('connected to mongodb atlas')
+    })
+    .catch((error) => {
+        console.log('error connecting to mongodb atlas: ', error)
+    })
+
 // define middleware here (middleware is called on requests in the order it's defined)
-app.use(express.json())
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // debugging middleware to print out any request and method that comes in
 app.use((req, res, next) => {
@@ -30,21 +44,9 @@ app.use((req, res) => {
 // check for and log errors
 app.use((err, req, res, next) => {
     console.error('ERROR: ', err); // Log the error for debugging purposes
-  
+
     res.status(500).json({ error: 'Internal Server Error' });
 });
-
-// connect to db
-mongoose.connect(process.env.MONG_URI, {
-    useNewUrlParser: true, // TODO are these two params needed?
-    useUnifiedTopology: true
-})
-.then(() => {
-    console.log('connected to mongodb atlas')
-})
-.catch((error) => {
-    console.log('error connecting to mongodb atlas: ', error)
-})
 
 // listen for request to backend
 app.listen(process.env.PORT, () => {
