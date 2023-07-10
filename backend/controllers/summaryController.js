@@ -35,16 +35,40 @@ exports.fetchSummary = async (req, res) => {
     }
 }
 
-exports.findSummaryFromText = (req, res) => {
-    let searchText = req.query('searchText').toString()
-    if (!searchText.isString()) {
-        res.status(400).json({ error: 'The summary search query must be a string' })
+exports.findSummaryFromText = async (req, res) => {
+    let searchText = ''
+    try {
+        searchText = req.query('searchText').toString()
     }
-    res.status(200).json({ message: 'hello world' })
+    catch (e) {
+        console.error('searchText parameter is not formatted properly')
+        res.status(400).json({ error: 'searchText parameter is not formatted properly' })
+    }
+
+    let matchingSummaries = []
+    try {
+        matchingSummaries = await Summary.find({ user: req.params.userId, title: { $regex: searchText, $options: 'i' } })
+    }
+    catch (e) {
+        console.error(e.message)
+        res.status(400).json({ error: 'The following error occurred while searching users summaries: ' + e.message })
+    }
+
+    res.status(200).json({ summaries: matchingSummaries})
 }
 
-exports.updateSummaryTitle = (req, res) => {
-    res.status(200).json({ message: 'hello world' })
+exports.updateSummaryTitle = async (req, res) => {
+    try {
+        const summaryId = req.params.summaryId
+        const newTitle = req.body.title
+        await Summary.findByIdAndUpdate(summaryId, { title: newTitle }, (err, updatedSummary) => {
+            if (!updatedSummary) { res.status(404).json({ error: 'Summary not found' }) }
+        })
+    }
+    catch (e) {
+        console.error(e.message)
+        res.status(400).json({ error: 'The following error occurred while updating summary title: ' + e.message })
+    }
 }
 
 exports.deleteSummary = async (req, res) => {
@@ -68,8 +92,7 @@ exports.createSummary = async (req, res) => {
     let user = null
     try {
         user = await User.findById(userId)
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e.message)
         res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
     }
