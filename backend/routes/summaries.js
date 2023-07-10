@@ -8,19 +8,19 @@ const router = express.Router()
 // fetch all summaries from user (in chronological order with option to reverse order)
 router.get('/:userId(\\d+)', summaryController.fetchAllFromUser)
 
-// fetch specific summary from user
-router.get('/:userId(\\d+)/fetchSummary/:summaryId(\\d+)', summaryController.fetchOneFromUser)
+// fetch specific summary
+router.get('/fetchSummary/:summaryId(\\d+)', summaryController.fetchSummary)
 
-// fetch only summaries with given search text in title
-router.get('/:userId(\\d+)/findSummary', (req, res) => summaryController.findSummaryFromText)
+// fetch only summaries with given search text in title associated with user (search text is a url query param)
+router.get('/:userId(\\d+)/findSummary', summaryController.findSummaryFromText)
 
 // update specific summary title
-router.patch('/:userId(\\d+)/getSummaryTitle/:summaryId(\\d+)', summaryController.updateSummaryTitle)
+router.patch('/updateSummaryTitle/:summaryId(\\d+)', summaryController.updateSummaryTitle)
 
 // delete specific summary
-router.delete('/:userId(\\d+)/deleteSummary/:summaryId(\\d+)', summaryController.deleteSummary)
+router.delete('/deleteSummary/:summaryId(\\d+)', summaryController.deleteSummary)
 
-// create new summary
+// create new summary associated with user
 router.post('/:userId(\\d+)/createSummary', summaryController.createSummary)
 
 
