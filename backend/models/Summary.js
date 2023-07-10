@@ -24,11 +24,12 @@ const summarySchema = new mongoose.Schema({
     dateCreated: {
         type: Date,
         required: true,
+        default: Date.now,
     },
-    // user: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'User',
-    // }
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }
 })
 
 // define how it is serialized
