@@ -25,12 +25,21 @@ const summarySchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    }
+    // user: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'User',
+    // }
 })
+
+// define how it is serialized
+// toJSON takes an obtions object which takes a transform method if we want to pass on
+// transform method is called on toJSON's output before it is returned
+// summarySchema.set('toJSON', {
+//     transform: (originalObject, returnedObject) => {
+//         returnedObject.user = returnedObject.user._id
+//     }
+// })
 
 let summaryModel = mongoose.model('Summary', summarySchema)
 
-export default summaryModel
+module.exports = summaryModel

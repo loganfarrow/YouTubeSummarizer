@@ -1,3 +1,4 @@
+const e = require('express')
 const Summary = require('../models/Summary')
 const User = require('../models/User')
 
@@ -20,12 +21,18 @@ exports.fetchAllFromUser = async (req, res) => {
     }
 
     console.log(summaries)
-
     res.status(200).json(summaries)
 }
 
-exports.fetchOneFromUser = (req, res) => {
-    res.status(200).json({ message: 'hello world' })
+exports.fetchSummary = async (req, res) => {
+    try {
+        const summaryId = req.params.summaryId
+        const summary = await Summary.findById(summaryId)
+        res.status(200).json(summary)
+    } catch(e) {
+        console.error(e.message)
+        res.status(400).json({ error: 'The following error occurred while getting summary: ' + e.message })
+    }
 }
 
 exports.findSummaryFromText = (req, res) => {
@@ -40,8 +47,17 @@ exports.updateSummaryTitle = (req, res) => {
     res.status(200).json({ message: 'hello world' })
 }
 
-exports.deleteSummary = (req, res) => {
-    res.status(200).json({ message: 'hello world' })
+exports.deleteSummary = async (req, res) => {
+    try {
+        const summaryId = req.params.summaryId
+        await Summary.findByIdAndRemove(summaryId, (err, deletedSummary) => {
+            if (!deletedSummary) { res.status(404).json({ error: 'Summary not found' }) }
+        })
+        res.status(200).json({ message: 'Successfully deleted summary' })
+    } catch(e) {
+        console.error(e.message)
+        res.status(400).json({ error: 'The following error occurred while deleting summary: ' + e.message })
+    }
 }
 
 exports.createSummary = async (req, res) => {
