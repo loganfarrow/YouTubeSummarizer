@@ -9,6 +9,10 @@ router.post('/login', authController.login)
 
 router.post('/register', authController.register)
 
-router.get('/logout', authController.logout)
+router.patch('/updatePassword', authController.updatePassword)
+
+router.patch('/updateEmail', authController.updateEmail)
+
+router.patch('/deleteUser', authController.deleteUser)
 
 module.exports = router
