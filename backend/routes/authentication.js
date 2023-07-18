@@ -3,11 +3,19 @@
 require('dotenv').config()
 const express = require('express')
 const authController = require('../controllers/authController')
+const requireAuth = require('../middleware/requireAuth')
+
 const router = express.Router()
+
+// apply requireAuth middleware to routes that require authentication
+const routesNeedingAuth = ['/updateOpenAiKey', '/updatePassword', '/updateEmail', '/deleteUser']
+router.use(routesNeedingAuth, requireAuth)
 
 router.post('/login', authController.login)
 
 router.post('/register', authController.register)
+
+router.patch('/updateOpenAiKey', authController.updateOpenAiKey)
 
 router.patch('/updatePassword', authController.updatePassword)
 

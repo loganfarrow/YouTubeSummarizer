@@ -1,18 +1,35 @@
 require('dotenv').config()
 const express = require('express')
 const summaryController = require('../controllers/summaryController')
+const requireAuth = require('../middleware/requireAuth')
+
 // const { check, validationResult } = require('express-validator');
 
 const router = express.Router()
 
-// fetch all summaries from user (in chronological order with option to reverse order)
-router.get('/:userId(\\d+)', summaryController.fetchAllFromUser)
+// apply requireAuth middleware to routes that require authentication
+// TODO: 
+// will need to remove some of these if we implement a public summary feature that 
+// doesn't require authentication, also if we implement a friends 
+// feature / anything that allows you to see other people's summaries
+const routesNeedingAuth = [
+    '/fetchSummaries',
+    '/fetchSummary/:summaryId(\\d+)',
+    '/findSummary',
+    '/updateSummaryTitle/:summaryId(\\d+)',
+    '/deleteSummary/:summaryId(\\d+)',
+    '/createSummary'
+]
+router.use(routesNeedingAuth, requireAuth)
 
-// fetch specific summary
+// fetch all summaries from user (in chronological order with option to reverse order)
+router.get('/fetchSummaries', summaryController.fetchAllFromUser)
+
+// fetch specific summary from user
 router.get('/fetchSummary/:summaryId(\\d+)', summaryController.fetchSummary)
 
 // fetch only summaries with given search text in title associated with user (search text is a url query param)
-router.get('/:userId(\\d+)/findSummary', summaryController.findSummaryFromText)
+router.get('/findSummary', summaryController.findSummaryFromText)
 
 // update specific summary title
 router.patch('/updateSummaryTitle/:summaryId(\\d+)', summaryController.updateSummaryTitle)
@@ -21,7 +38,7 @@ router.patch('/updateSummaryTitle/:summaryId(\\d+)', summaryController.updateSum
 router.delete('/deleteSummary/:summaryId(\\d+)', summaryController.deleteSummary)
 
 // create new summary associated with user
-router.post('/:userId(\\d+)/createSummary', summaryController.createSummary)
+router.post('/createSummary', summaryController.createSummary)
 
 
 module.exports = router

@@ -6,6 +6,11 @@ const userAlreadyExists = 'Cannot signup with email that is already associated w
 const userDoesNotExistForEmail = 'No user is associated with the provided email'
 const incorrectPassword = 'Incorrect password'
 
+// for when there is no auth header
+const authorizationRequired = 'You must be logged in to access this endpoint (authorization header not found, token is needed)'
+// for when there is an auth header but the token is invalid
+const unauthorizedToken = 'You must be logged in to access this endpoint (token in authorization header is invalid)'
+
 module.exports = {
     provideEmailAndPasswordToRegister,
     provideValidEmailToRegister,
@@ -13,4 +18,6 @@ module.exports = {
     userAlreadyExists,
     userDoesNotExistForEmail,
     incorrectPassword,
+    authorizationRequired,
+    unauthorizedToken,
 }

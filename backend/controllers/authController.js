@@ -3,7 +3,7 @@ const errorMessages = require('../utils/error_messages')
 const jwt = require('jsonwebtoken')
 
 const createToken = (_id) => {
-    // this token never expires (user never forced to log out)
+    // this token never expires (user never forced to log out) (can set this later if needed)
     return jwt.sign({ _id }, process.env.JWT_SECRET)
 }
 
@@ -32,6 +32,11 @@ exports.register = async (req, res) => {
 }
 
 exports.updateOpenAiKey = async (req, res) => {
+    const { userId } = req
+    const { openAiKey } = req.body
+
+
+
     res.status(200).json({ message: 'updateOpenAiKey endpoint not implemented yet' })
 }
 
