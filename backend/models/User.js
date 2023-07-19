@@ -84,22 +84,16 @@ userSchema.statics.login = async function (email, password) {
     return user
 }
 
-// TODO this shouldn't be static
-// since it's unique for each userId, we can just make it a normal method on the userSchema
-// the only caveat is that we need to get the user outside of the method
-userSchema.statics.updatePassword = async function (userId, newPassword) {
-    const user = this.findById(userId)
-    if (!user) {
-        throw new Error(errorMessages.userDoesNotExistForId)
-    }
 
+// for non-static method, this refers to the instance of the user, not the User class
+userSchema.methods.updatePassword = async function (newPassword) {
     // proposed new password must be strong
     if (!validator.isStrongPassword(newPassword)) {
         throw new Error(errorMessages.provideStrongPasswordToRegister)
     }
 
     // return error if current password is the same as the new password
-    const curPassword = user.hashed_password
+    const curPassword = this.hashed_password
     if (bcrypt.compare(curPassword, newPassword)) {
         throw new Error('new password must be different than the current password')
     }
@@ -108,9 +102,26 @@ userSchema.statics.updatePassword = async function (userId, newPassword) {
     const salt = await bcrypt.genSalt(10)
     const hashed_new_password = await bcrypt.hash(newPassword, salt)
 
-    user.hashed_password = hashed_new_password
-    await user.save()
-    return user
+    this.hashed_password = hashed_new_password
+    await this.save()
+    return this
+}
+
+userSchema.methods.updateEmail = async function (newEmail) {
+    // proposed new email must be valid
+    if (!validator.isEmail(newEmail)) {
+        throw new Error(errorMessages.provideValidEmailToRegister)
+    }
+
+    // return error if current email is the same as the new email
+    const curEmail = this.email
+    if (curEmail === newEmail) {
+        throw new Error('new email must be different than the current email')
+    }
+
+    this.email = newEmail
+    await this.save()
+    return this
 }
 
 let userModel = mongoose.model('User', userSchema)
