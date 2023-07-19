@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const errorMessages = require('../utils/error_messages')
 const jwt = require('jsonwebtoken')
+const axios = require('axios')
 
 const createToken = (_id) => {
     // this token never expires (user never forced to log out) (can set this later if needed)
@@ -8,19 +9,19 @@ const createToken = (_id) => {
 }
 
 exports.login = async (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
 
     try {
         const user = await User.login(email, password)
         const token = createToken(user._id)
         res.status(200).json({ email, user, token })
     } catch (e) {
-        res.status(400).json({e: e.message})
-    } 
+        res.status(400).json({ e: e.message })
+    }
 }
 
 exports.register = async (req, res) => {
-    const {email, password } = req.body
+    const { email, password } = req.body
 
     try {
         const user = await User.register(email, password)
@@ -32,12 +33,15 @@ exports.register = async (req, res) => {
 }
 
 exports.updateOpenAiKey = async (req, res) => {
-    const { userId } = req
-    const { openAiKey } = req.body
+    const { userId, openaiKey } = req
+    const { newOpenaiKey } = req.body
 
+    
+}
 
-
-    res.status(200).json({ message: 'updateOpenAiKey endpoint not implemented yet' })
+exports.fetchUser = async (req, res) => {
+    // return email, date created, and ENCRYPTED openai key
+    req.status(200).json({ message: 'fetchUser endpoint not implemented yet' })
 }
 
 exports.updatePassword = async (req, res) => {
