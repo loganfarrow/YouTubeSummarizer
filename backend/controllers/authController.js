@@ -73,8 +73,13 @@ exports.updatePassword = async (req, res) => {
         res.status(400).json({ e: 'newPassword is required in request body'})
     }
 
+    const user = User.findById(userId)
+    if (!user) {
+        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+    }
+
     try {
-        User.updatePassword(userId, newPassword)
+        user.updatePassword(newPassword)
         res.status(200).json({ message: 'Successfully updated password for user with id: ' + userId })
     } catch (e) {
         res.status(400).json({ e: e.message })
@@ -82,8 +87,20 @@ exports.updatePassword = async (req, res) => {
 }
 
 exports.updateEmail = async (req, res) => {
-    // PATCH
-    res.status(200).json({ message: 'updateEmail endpoint not implemented yet' })
+    const { userId } = req
+    const { newEmail } = req.body
+
+    const user = User.findById(userId)
+    if (!user) {
+        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+    }
+
+    try {
+        user.updateEmail(newEmail)
+        res.status(200).json({ message: 'Successfully updated email for user with id: ' + userId })
+    } catch (e) {
+        res.status(400).json({ e: e.message })
+    }
 }
 
 exports.deleteUser = async (req, res) => {
