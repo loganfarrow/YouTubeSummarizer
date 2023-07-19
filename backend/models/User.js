@@ -84,6 +84,35 @@ userSchema.statics.login = async function (email, password) {
     return user
 }
 
+// TODO this shouldn't be static
+// since it's unique for each userId, we can just make it a normal method on the userSchema
+// the only caveat is that we need to get the user outside of the method
+userSchema.statics.updatePassword = async function (userId, newPassword) {
+    const user = this.findById(userId)
+    if (!user) {
+        throw new Error(errorMessages.userDoesNotExistForId)
+    }
+
+    // proposed new password must be strong
+    if (!validator.isStrongPassword(newPassword)) {
+        throw new Error(errorMessages.provideStrongPasswordToRegister)
+    }
+
+    // return error if current password is the same as the new password
+    const curPassword = user.hashed_password
+    if (bcrypt.compare(curPassword, newPassword)) {
+        throw new Error('new password must be different than the current password')
+    }
+
+    // salt: random string added to password before hashing to make it more secure
+    const salt = await bcrypt.genSalt(10)
+    const hashed_new_password = await bcrypt.hash(newPassword, salt)
+
+    user.hashed_password = hashed_new_password
+    await user.save()
+    return user
+}
+
 let userModel = mongoose.model('User', userSchema)
 
 module.exports = userModel

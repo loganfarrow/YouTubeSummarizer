@@ -27,6 +27,6 @@ router.patch('/updatePassword', authController.updatePassword)
 
 router.patch('/updateEmail', authController.updateEmail)
 
-router.patch('/deleteUser', authController.deleteUser)
+router.delete('/deleteUser', authController.deleteUser)
 
 module.exports = router

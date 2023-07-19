@@ -28,7 +28,7 @@ exports.fetchSummary = async (req, res) => {
         const summaryId = req.summaryId
         const summary = await Summary.findById(summaryId)
         res.status(200).json(summary)
-    } catch(e) {
+    } catch (e) {
         console.error(e.message)
         res.status(400).json({ error: 'The following error occurred while getting summary: ' + e.message })
     }
@@ -53,7 +53,7 @@ exports.findSummaryFromText = async (req, res) => {
         res.status(400).json({ error: 'The following error occurred while searching users summaries: ' + e.message })
     }
 
-    res.status(200).json({ summaries: matchingSummaries})
+    res.status(200).json({ summaries: matchingSummaries })
 }
 
 exports.updateSummaryTitle = async (req, res) => {
@@ -77,7 +77,7 @@ exports.deleteSummary = async (req, res) => {
             if (!deletedSummary) { res.status(404).json({ error: 'Summary not found' }) }
         })
         res.status(200).json({ message: 'Successfully deleted summary' })
-    } catch(e) {
+    } catch (e) {
         console.error(e.message)
         res.status(400).json({ error: 'The following error occurred while deleting summary: ' + e.message })
     }
@@ -94,7 +94,7 @@ exports.createSummary = async (req, res) => {
         console.error(e.message)
         res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
     }
-    
+
     let optionsJSON = ''
     try {
         optionsJSON = JSON.parse(options)
@@ -120,4 +120,18 @@ exports.createSummary = async (req, res) => {
         message: 'Summary successfully created',
         summary: savedSummary
     })
+}
+
+exports.generateSummary = async (req, res) => {
+    // get the userId and lookup corresponding openai key
+    // return an error message / response if they don't have a key
+    // key won't be invalid because we check for that before saving it to the user
+
+    // get the options from the request body (pass them as key value pairs?)
+
+    // TODO
+    // implement logic here (or add a function from the utils folder)
+    // to get the prompt to use based on the user's selected options
+
+    res.status(200).json({ message: 'generateSummary endpoint not implemented yet' })
 }
