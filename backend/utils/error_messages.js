@@ -11,6 +11,11 @@ const authorizationRequired = 'You must be logged in to access this endpoint (au
 // for when there is an auth header but the token is invalid
 const unauthorizedToken = 'You must be logged in to access this endpoint (token in authorization header is invalid)'
 
+// for when no openai key is provided when needed
+const noOpenaiKeyProvided = 'No openai key provided for endpoint that requires a valid openai key'
+// for when openai key is provided, but it is invalid
+const invalidOpenaiKeyProvided = 'Invalid openai key provided for endpoint that requires a valid openai key'
+
 module.exports = {
     provideEmailAndPasswordToRegister,
     provideValidEmailToRegister,
@@ -20,4 +25,6 @@ module.exports = {
     incorrectPassword,
     authorizationRequired,
     unauthorizedToken,
+    noOpenaiKeyProvided,
+    invalidOpenaiKeyProvided,
 }

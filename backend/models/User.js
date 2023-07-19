@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const mongooseFieldEncryption = require("mongoose-field-encryption").fieldEncryption;
 const bcrypt = require('bcrypt')
 const validator = require('validator')
 const errorMessages = require('../utils/error_messages')
@@ -19,7 +20,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    hashed_openai_key: {
+    openai_key: {
         type: String,
         required: false,
     },
@@ -28,6 +29,12 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: Date.now,
     }
+})
+
+// this encryption will introduce another field, __enc_openai_key which is true if the openai_key is encrypted
+userSchema.plugin(mongooseFieldEncryption, {
+    fields: ["openai_key"],
+    secret: process.env.ENCRYPTION_SECRET,
 })
 
 userSchema.statics.register = async function (email, password) {
