@@ -20,7 +20,7 @@ const routesNeedingAuth = [
     '/deleteSummary/:summaryId(\\d+)',
     '/createSummary'
 ]
-const routesNeedingValidateOpenaiKey = []
+
 router.use(routesNeedingAuth, requireAuth)
 
 // fetch all summaries from user (in chronological order with option to reverse order)
