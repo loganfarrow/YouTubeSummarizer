@@ -33,15 +33,35 @@ exports.register = async (req, res) => {
 }
 
 exports.updateOpenAiKey = async (req, res) => {
-    const { userId, openaiKey } = req
-    const { newOpenaiKey } = req.body
+    const { userId } = req
+    const { openaiKey } = req.body
 
-    
+    // new: true lets us get the updatedUser object when promise returns
+    await User.findByIdAndUpdate(userId, { openai_key: openaiKey }, { new: true })
+        .then((updatedUser) => {
+            if (!updatedUser) {
+                throw new Error(errorMessages.userDoesNotExistForId)
+            } else {
+                res.status(200).json({ message: 'Successfully updated openai key for user with id: ' + userId })
+            }
+        })
+        .catch((e) => {
+            res.status(400).json({ e: e.message })
+        })
 }
 
 exports.fetchUser = async (req, res) => {
-    // return email, date created, and ENCRYPTED openai key
-    req.status(200).json({ message: 'fetchUser endpoint not implemented yet' })
+    // return email, date created
+    const { userId } = req
+
+    const user = User.findById(userId)
+    if (!user) {
+        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+    }
+
+    // we use toIsoString because if the frontend has an ISO formatted string they 
+    // can get a date object by just passing the ISO string to the date constructor
+    res.status(200).json({ email: user.email, dateCreated: user.date_created.toISOString() })
 }
 
 exports.updatePassword = async (req, res) => {
