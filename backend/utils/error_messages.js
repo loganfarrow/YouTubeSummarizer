@@ -28,4 +28,5 @@ module.exports = {
     unauthorizedToken,
     noOpenaiKeyProvided,
     invalidOpenaiKeyProvided,
+    userDoesNotExistForId,
 }

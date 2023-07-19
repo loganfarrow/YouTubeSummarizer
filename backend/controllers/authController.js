@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const errorMessages = require('../utils/error_messages')
 const jwt = require('jsonwebtoken')
+const validator = require('validator')
 const axios = require('axios')
 
 const createToken = (_id) => {
@@ -65,13 +66,27 @@ exports.fetchUser = async (req, res) => {
 }
 
 exports.updatePassword = async (req, res) => {
-    res.status(200).json({ message: 'updatePassword endpoint not implemented yet' })
+    const { userId } = req
+    const { newPassword } = req.body
+    
+    if (!newPassword) {
+        res.status(400).json({ e: 'newPassword is required in request body'})
+    }
+
+    try {
+        User.updatePassword(userId, newPassword)
+        res.status(200).json({ message: 'Successfully updated password for user with id: ' + userId })
+    } catch (e) {
+        res.status(400).json({ e: e.message })
+    }
 }
 
 exports.updateEmail = async (req, res) => {
+    // PATCH
     res.status(200).json({ message: 'updateEmail endpoint not implemented yet' })
 }
 
 exports.deleteUser = async (req, res) => {
+    // DELETE
     res.status(200).json({ message: 'deleteUser endpoint not implemented yet' })
 }
