@@ -99,8 +99,9 @@ userSchema.methods.updatePassword = async function (newPassword) {
 
     // return error if current password is the same as the new password
     const curPassword = this.hashed_password
-    if (bcrypt.compare(curPassword, newPassword)) {
-        throw new Error('new password must be different than the current password')
+
+    if (await bcrypt.compare(newPassword, curPassword)) {
+        throw new Error(errorMessages.newPasswordMustBeDifferent)
     }
 
     // salt: random string added to password before hashing to make it more secure

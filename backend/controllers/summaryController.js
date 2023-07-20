@@ -89,7 +89,7 @@ exports.createSummary = async (req, res) => {
 
     let user = null
     try {
-        user = await User.findById(userId)
+        user = await User.findOne({ _id: userId })
     } catch (e) {
         console.error(e.message)
         res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
