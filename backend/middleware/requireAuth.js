@@ -16,11 +16,21 @@ const requireAuth = async (req, res, next) => {
 
     // verify token is valid (hasn't changed)
     try {
-        const { _id } = jwt.verify(token, process.env.JWT_SECRET)
+        const { _id } = await jwt.verify(token, process.env.JWT_SECRET)
         // attach the user id to the request object so we can access it in the next middleware (or route, if this is last middleware)
-        req.userId = await User.findById(_id).select('_id') // select returns only the _id field
+
+        const user = await User.findOne({ _id: _id })
+        if (!user) {
+            return res.status(401).json({ error: errorMessages.unauthorizedToken })
+        }
+        
+        req.userId = user._id
     } catch (e) {
         console.log(e)
+        return res.status(401).json({ error: errorMessages.unauthorizedToken })
+    }
+
+    if (typeof req.userId === 'undefined' || req.userId === null) {
         return res.status(401).json({ error: errorMessages.unauthorizedToken })
     }
 

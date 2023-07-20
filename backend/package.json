@@ -23,7 +23,7 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.1",
     "mongodb": "^5.7.0",
-    "mongoose": "^7.3.2",
+    "mongoose": "^7.4.0",
     "mongoose-field-encryption": "6.1.0",
     "validator": "^13.9.0"
   }

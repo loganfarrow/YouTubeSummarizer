@@ -1,3 +1,4 @@
+require('dotenv').config()
 const User = require('../models/User')
 const errorMessages = require('../utils/error_messages')
 const jwt = require('jsonwebtoken')
@@ -11,28 +12,28 @@ const createToken = (_id) => {
 
 exports.login = async (req, res) => {
     const { email, password } = req.body
-
+    let user = null
     try {
-        const user = await User.login(email, password)
-        const token = createToken(user._id)
-        res.status(200).json({ email, user, token })
+        user = await User.login(email, password)
     } catch (e) {
         console.error(e.message)
-        res.status(400).json({ e: e.message })
+        return res.status(400).json({ e: e.message })
     }
+    const token = createToken(user._id)
+    res.status(200).json({ email, token })
 }
 
 exports.register = async (req, res) => {
     const { email, password } = req.body
-
+    let user = null
     try {
-        const user = await User.register(email, password)
-        const token = createToken(user._id)
-        res.status(200).json({ email, user, token })
+        user = await User.register(email, password)
     } catch (e) {
         console.error(e.message)
-        res.status(400).json({ e: e.message })
+        return res.status(400).json({ e: e.message })
     }
+    const token = createToken(user._id)
+    res.status(200).json({ email, token })
 }
 
 exports.updateOpenAiKey = async (req, res) => {
@@ -58,27 +59,28 @@ exports.fetchUser = async (req, res) => {
     // return email, date created
     const { userId } = req
 
-    const user = User.findById(userId)
+    const user = await User.findOne({ _id: userId })
+
     if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     // we use toIsoString because if the frontend has an ISO formatted string they 
     // can get a date object by just passing the ISO string to the date constructor
-    res.status(200).json({ email: user.email, dateCreated: user.date_created.toISOString() })
+    res.status(200).json({ email: user.email, dateCreated: user.dateCreated.toISOString() })
 }
 
 exports.updatePassword = async (req, res) => {
     const { userId } = req
     const { newPassword } = req.body
-    
+
     if (!newPassword) {
-        res.status(400).json({ e: 'newPassword is required in request body'})
+        return res.status(400).json({ e: 'newPassword is required in request body' })
     }
 
     const user = User.findById(userId)
     if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     try {
@@ -96,7 +98,7 @@ exports.updateEmail = async (req, res) => {
 
     const user = User.findById(userId)
     if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     try {
@@ -113,7 +115,7 @@ exports.deleteUser = async (req, res) => {
 
     const user = User.findById(userId)
     if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     try {
@@ -123,5 +125,5 @@ exports.deleteUser = async (req, res) => {
         console.error(e.message)
         res.status(400).json({ e: errorMessages.failedToDeleteUser })
     }
-    
+
 }
