@@ -122,7 +122,7 @@ userSchema.methods.updateEmail = async function (newEmail) {
     // return error if current email is the same as the new email
     const curEmail = this.email
     if (curEmail === newEmail) {
-        throw new Error('new email must be different than the current email')
+        throw new Error(errorMessages.newEmailMustBeDifferent)
     }
 
     this.email = newEmail

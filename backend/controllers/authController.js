@@ -102,7 +102,7 @@ exports.updateEmail = async (req, res) => {
     }
 
     try {
-        user.updateEmail(newEmail)
+        await user.updateEmail(newEmail)
         res.status(200).json({ message: 'Successfully updated email for user with id: ' + userId })
     } catch (e) {
         console.error(e.message)
@@ -113,17 +113,15 @@ exports.updateEmail = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     const { userId } = req
 
-    const user = await User.findOne({ _id: userId })
-    if (!user) {
-        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
-    }
-
-    try {
-        await User.findByIdAndDelete(userId)
-        res.status(200).json({ message: 'Successfully deleted user with id: ' + userId })
-    } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ e: errorMessages.failedToDeleteUser })
-    }
-
+    User.deleteOne({ _id: userId })
+        .then((result) => {
+            if (result.deletedCount === 0) {
+                res.status(400).json({ e: errorMessages.attemptedToDeleteUserThatDoesntExist })
+            }
+            return res.status(200).json({ message: 'Successfully deleted user with id: ' + userId })
+        })
+        .catch((e) => {
+            console.error(e.message)
+            res.status(400).json({ e: errorMessages.failedToDeleteUser })
+        })
 }

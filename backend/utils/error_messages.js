@@ -9,6 +9,8 @@ const userDoesNotExistForEmail = 'No user is associated with the provided email'
 const incorrectPassword = 'Incorrect password'
 const newPasswordRequired = "Must provide new password when updating password"
 const newPasswordMustBeDifferent = "new password must be different than the current password"
+const newEmailMustBeDifferent = "new email must be different than the current email"
+const attemptedToDeleteUserThatDoesntExist = "Attempted to delete user that doesn't exist"
 
 // for when there is no auth header
 const authorizationRequired = 'You must be logged in to access this endpoint (authorization header not found, token is needed)'
@@ -35,4 +37,6 @@ module.exports = {
     failedToDeleteUser,
     newPasswordRequired,
     newPasswordMustBeDifferent,
+    newEmailMustBeDifferent,
+    attemptedToDeleteUserThatDoesntExist,
 }
