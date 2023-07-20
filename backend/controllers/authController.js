@@ -75,16 +75,16 @@ exports.updatePassword = async (req, res) => {
     const { newPassword } = req.body
 
     if (!newPassword) {
-        return res.status(400).json({ e: 'newPassword is required in request body' })
+        return res.status(400).json({ e: errorMessages.newPasswordRequired })
     }
 
-    const user = User.findById(userId)
+    const user = await User.findOne({ _id: userId })
     if (!user) {
         return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     try {
-        user.updatePassword(newPassword)
+        await user.updatePassword(newPassword)
         res.status(200).json({ message: 'Successfully updated password for user with id: ' + userId })
     } catch (e) {
         console.error(e.message)
@@ -96,7 +96,7 @@ exports.updateEmail = async (req, res) => {
     const { userId } = req
     const { newEmail } = req.body
 
-    const user = User.findById(userId)
+    const user = await User.findOne({ _id: userId })
     if (!user) {
         return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
@@ -113,7 +113,7 @@ exports.updateEmail = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     const { userId } = req
 
-    const user = User.findById(userId)
+    const user = await User.findOne({ _id: userId })
     if (!user) {
         return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
