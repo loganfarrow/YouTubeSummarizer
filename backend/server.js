@@ -38,14 +38,14 @@ app.use('/api/summaries', summaryRoutes)
 
 // if no routes match, return 404 and remind them to only use integer paramters for userId and summaryId
 app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found, make sure you are passing in integer paramters for userId and summaryId in the url' });
+    return res.status(404).json({ error: 'Route not found, make sure you are passing in integer paramters for userId and summaryId in the url' });
 });
 
 // check for and log errors
 app.use((err, req, res, next) => {
     console.error('ERROR: ', err); // Log the error for debugging purposes
 
-    res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error' });
 });
 
 // listen for request to backend
