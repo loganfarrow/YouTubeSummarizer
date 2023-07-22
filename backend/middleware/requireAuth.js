@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
 const errorMessages = require('../utils/error_messages')
 const User = require('../models/User')
 
@@ -19,11 +20,11 @@ const requireAuth = async (req, res, next) => {
         const { _id } = await jwt.verify(token, process.env.JWT_SECRET)
         // attach the user id to the request object so we can access it in the next middleware (or route, if this is last middleware)
 
-        const user = await User.findOne({ _id: _id })
+        const user = await User.findById(_id)
         if (!user) {
             return res.status(401).json({ error: errorMessages.unauthorizedToken })
         }
-        
+
         req.userId = user._id
     } catch (e) {
         console.log(e)

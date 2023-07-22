@@ -32,7 +32,7 @@ exports.fetchSummary = async (req, res) => {
         return res.status(200).json(summary)
     } catch (e) {
         console.error(e.message)
-        return  res.status(400).json({ error: 'The following error occurred while getting summary: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while getting summary: ' + e.message })
     }
 }
 
@@ -62,9 +62,11 @@ exports.updateSummaryTitle = async (req, res) => {
     try {
         const summaryId = req.summaryId
         const newTitle = req.body.title
-        await Summary.findByIdAndUpdate(summaryId, { title: newTitle }, (err, updatedSummary) => {
-            if (!updatedSummary) { return res.status(404).json({ error: 'Summary not found' }) }
-        })
+
+        const updatedSummary = await Summary.findByIdAndUpdate(summaryId, { title: newTitle }, { new: true })
+        if (!updatedSummary) {
+            return res.status(404).json({ error: 'Summary not found' }) 
+        }
     }
     catch (e) {
         console.error(e.message)
@@ -74,10 +76,11 @@ exports.updateSummaryTitle = async (req, res) => {
 
 exports.deleteSummary = async (req, res) => {
     try {
-        const summaryId = req.params.summaryId
-        await Summary.findByIdAndRemove(summaryId, (err, deletedSummary) => {
-            if (!deletedSummary) { res.status(404).json({ error: 'Summary not found' }) }
-        })
+        const { summaryId } = req.body
+        const deletedSummary = await Summary.findByIdAndRemove(summaryId)
+        if (!deletedSummary) {
+            return res.status(404).json({ error: 'Summary not found' }) 
+        }
         return res.status(200).json({ message: 'Successfully deleted summary' })
     } catch (e) {
         console.error(e.message)
@@ -91,7 +94,7 @@ exports.createSummary = async (req, res) => {
 
     let user = null
     try {
-        user = await User.findOne({ _id: userId })
+        user = await User.findById(userId)
     } catch (e) {
         console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
@@ -99,10 +102,10 @@ exports.createSummary = async (req, res) => {
 
     let options = {}
     try {
-        options = await Options.createNewOptions(JSON.parse(optionsDict))
+        options = await Options.createNewOptions(optionsDict)
     } catch (e) {
         console.error(e.message)
-        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + "\n" + errorMessages.ensureValidOptions })
+        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + '/n' + errorMessages.ensureValidOptions })
     }
 
     let savedSummary = null
@@ -119,7 +122,7 @@ exports.createSummary = async (req, res) => {
         return res.status(400).json({ error: 'The following error occurred while saving summary: ' + e.message })
     }
 
-    res.status(200).json({
+    return res.status(200).json({
         message: 'Summary successfully created',
         summary: savedSummary
     })
@@ -139,5 +142,5 @@ exports.generateSummary = async (req, res) => {
     // TODO need to also use a summarizer to get title
     // does openai provide the title of the summary?
 
-    res.status(200).json({ message: 'generateSummary endpoint not implemented yet' })
+    return res.status(200).json({ message: 'generateSummary endpoint not implemented yet' })
 }
