@@ -36,19 +36,26 @@ exports.fetchSummary = async (req, res) => {
     }
 }
 
-exports.findSummaryFromText = async (req, res) => {
+exports.findSummaryFromTitle = async (req, res) => {
     let searchText = ''
     try {
-        searchText = req.query('searchText').toString()
+        searchText = req.query.searchText.toString()
     }
     catch (e) {
         console.error('searchText parameter is not formatted properly')
         return res.status(400).json({ error: 'searchText parameter is not formatted properly' })
     }
 
+    let user = null
+    try {
+        user = await User.findById(req.userId)
+    } catch (e) {
+        return res.status(400).json('User associated with summary not found, if you have an account try logging out and back in')
+    }
+
     let matchingSummaries = []
     try {
-        matchingSummaries = await Summary.find({ user: req.userId, title: { $regex: searchText, $options: 'i' } })
+        matchingSummaries = await Summary.find({ user: user, title: { $regex: RegExp(searchText, 'i') } }) // i = case insensitive
     }
     catch (e) {
         console.error(e.message)

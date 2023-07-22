@@ -31,7 +31,7 @@ router.get('/fetchSummaries', summaryController.fetchAllFromUser)
 router.get('/fetchSummary', summaryController.fetchSummary)
 
 // fetch only summaries with given search text in title associated with user (search text is a url query param)
-router.get('/findSummary', summaryController.findSummaryFromText)
+router.get('/findSummary', summaryController.findSummaryFromTitle)
 
 // update summary fields (title, summary text, options, dateCreated)
 router.patch('/updateSummary', summaryController.updateSummary)
