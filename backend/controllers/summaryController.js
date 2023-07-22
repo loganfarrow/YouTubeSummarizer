@@ -60,8 +60,8 @@ exports.findSummaryFromText = async (req, res) => {
 
 exports.updateSummary = async (req, res) => {
     try {
-        // since each parameter is optional, we want to set them to null if not provided (else they will be undefined)
-        const { summaryId = null, newTitle = null, newSummary = null, newOptions = null } = req.body
+        // since each parameter is optional (except the id), we want to set them to null if not provided (else they will be undefined)
+        const { summaryId, newTitle = null, newSummary = null, newOptions = null } = req.body
 
         const summary = await Summary.findById(summaryId)
         if (!summary) {
@@ -69,7 +69,7 @@ exports.updateSummary = async (req, res) => {
         }
 
         // we update the fields that are provided and leave the rest the same (a || b means if a is null we use b)
-        await Summary.findByIdAndUpdate(summaryId, { 
+        await Summary.findByIdAndUpdate(summaryId, {
             title: newTitle || summary.title,
             summary: newSummary || summary.summary,
             options: newOptions || summary.options,
@@ -124,7 +124,7 @@ exports.createSummary = async (req, res) => {
             title: title,
             summary: summary,
             options: options,
-            user: userId
+            user: user
         })
         savedSummary = await newSummary.save()
     } catch (e) {
