@@ -27,8 +27,11 @@ exports.fetchAllFromUser = async (req, res) => {
 
 exports.fetchSummary = async (req, res) => {
     try {
-        const summaryId = req.summaryId
+        const summaryId = req.query.summaryId.toString()
         const summary = await Summary.findById(summaryId)
+        if (!summary) {
+            return res.status(404).json({ error: 'Summary not found' })
+        }
         return res.status(200).json(summary)
     } catch (e) {
         console.error(e.message)
