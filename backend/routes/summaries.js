@@ -14,10 +14,10 @@ const router = express.Router()
 // feature / anything that allows you to see other people's summaries
 const routesNeedingAuth = [
     '/fetchSummaries',
-    '/fetchSummary/:summaryId(\\d+)',
+    '/fetchSummary',
     '/findSummary',
-    '/updateSummaryTitle/:summaryId(\\d+)',
-    '/deleteSummary/:summaryId(\\d+)',
+    '/updateSummaryTitle',
+    '/deleteSummary',
     '/createSummary',
     '/generateSummary'
 ]
@@ -28,16 +28,16 @@ router.use(routesNeedingAuth, requireAuth)
 router.get('/fetchSummaries', summaryController.fetchAllFromUser)
 
 // fetch specific summary from user
-router.get('/fetchSummary/:summaryId(\\d+)', summaryController.fetchSummary)
+router.get('/fetchSummary', summaryController.fetchSummary)
 
 // fetch only summaries with given search text in title associated with user (search text is a url query param)
 router.get('/findSummary', summaryController.findSummaryFromText)
 
 // update specific summary title
-router.patch('/updateSummaryTitle/:summaryId(\\d+)', summaryController.updateSummaryTitle)
+router.patch('/updateSummaryTitle', summaryController.updateSummaryTitle)
 
 // delete specific summary
-router.delete('/deleteSummary/:summaryId(\\d+)', summaryController.deleteSummary)
+router.delete('/deleteSummary', summaryController.deleteSummary)
 
 // create new summary associated with user
 router.post('/createSummary', summaryController.createSummary)
