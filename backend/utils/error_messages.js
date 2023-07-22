@@ -12,6 +12,9 @@ const newPasswordMustBeDifferent = "new password must be different than the curr
 const newEmailMustBeDifferent = "new email must be different than the current email"
 const attemptedToDeleteUserThatDoesntExist = "Attempted to delete user that doesn't exist"
 
+const unableToParseOptions = "Unable to parse options dictionary to json"
+const ensureValidOptions = "Ensure you are passing in a valid options dictionary"
+
 // for when there is no auth header
 const authorizationRequired = 'You must be logged in to access this endpoint (authorization header not found, token is needed)'
 // for when there is an auth header but the token is invalid
@@ -39,4 +42,6 @@ module.exports = {
     newPasswordMustBeDifferent,
     newEmailMustBeDifferent,
     attemptedToDeleteUserThatDoesntExist,
+    unableToParseOptions,
+    ensureValidOptions,
 }
