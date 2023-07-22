@@ -60,12 +60,35 @@ exports.findSummaryFromText = async (req, res) => {
 
 exports.updateSummary = async (req, res) => {
     try {
+
         // since each parameter is optional (except the id), we want to set them to null if not provided (else they will be undefined)
-        const { summaryId, newTitle = null, newSummary = null, newOptions = null } = req.body
+        const { summaryId, newTitle = null, newSummary = null, newOptionsDict = null } = req.body
+
+        if (!newTitle && !newSummary && !newOptionsDict) {
+            return res.status(400).json({ error: 'No fields provided to update' })
+        }
 
         const summary = await Summary.findById(summaryId)
         if (!summary) {
             return res.status(404).json({ error: 'Summary not found' })
+        }
+
+        // need to create the new Options object if we are updating
+        // should also delete the old options object if we are updating
+        let newOptions = null
+        if (newOptionsDict) {
+            try {
+                newOptions = await Options.createNewOptions(newOptionsDict)
+                newOptions.save()
+            } catch (e) {
+                console.error(e.message)
+                return res.status(400).json({ error: 'Failed to parse options argument, ensure request is properly formatted' })
+            }
+
+            await Options.findByIdAndRemove(summary.options._id)
+
+            // update the summary with the new options object
+            await Summary.findByIdAndUpdate(summaryId, { options: newOptions }, { new: true })
         }
 
         // we update the fields that are provided and leave the rest the same (a || b means if a is null we use b)
@@ -75,6 +98,8 @@ exports.updateSummary = async (req, res) => {
             options: newOptions || summary.options,
             dateCreated: new Date()
         }, { new: true })
+
+        return res.status(200).json({ message: 'Successfully updated summary', updatedSummary: summary })
     }
     catch (e) {
         console.error(e.message)
@@ -113,6 +138,7 @@ exports.createSummary = async (req, res) => {
     let options = {}
     try {
         options = await Options.createNewOptions(optionsDict)
+        options.save()
     } catch (e) {
         console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + '/n' + errorMessages.ensureValidOptions })

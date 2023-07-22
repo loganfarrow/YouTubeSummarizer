@@ -38,7 +38,7 @@ app.use('/api/summaries', summaryRoutes)
 
 // if no routes match, return 404 and remind them to only use integer paramters for userId and summaryId
 app.use((req, res) => {
-    return res.status(404).json({ error: 'Route not found, make sure you are passing in integer paramters for userId and summaryId in the url' });
+    return res.status(404).json({ error: 'Route not found' });
 });
 
 // check for and log errors
