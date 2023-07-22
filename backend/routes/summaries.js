@@ -33,8 +33,8 @@ router.get('/fetchSummary', summaryController.fetchSummary)
 // fetch only summaries with given search text in title associated with user (search text is a url query param)
 router.get('/findSummary', summaryController.findSummaryFromText)
 
-// update specific summary title
-router.patch('/updateSummaryTitle', summaryController.updateSummaryTitle)
+// update summary fields (title, summary text, options, dateCreated)
+router.patch('/updateSummary', summaryController.updateSummary)
 
 // delete specific summary
 router.delete('/deleteSummary', summaryController.deleteSummary)
