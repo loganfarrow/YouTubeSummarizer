@@ -10,7 +10,7 @@ exports.fetchAllFromUser = async (req, res) => {
     try {
         let user = await User.findById(req.userId)
     } catch (e) {
-        return res.status(400).json('User not found, try logging out and logging in if you think this is an error')
+        return res.status(400).json(errorMessages.userDoesNotExistForId)
     }
 
     let summaries = []
@@ -31,11 +31,10 @@ exports.fetchSummary = async (req, res) => {
         const summaryId = req.query.summaryId.toString()
         const summary = await Summary.findById(summaryId)
         if (!summary) {
-            return res.status(404).json({ error: 'Summary not found' })
+            return res.status(404).json({ error: errorMessages.summaryNotFound })
         }
         return res.status(200).json(summary)
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while getting summary: ' + e.message })
     }
 }
@@ -46,15 +45,14 @@ exports.findSummaryFromTitle = async (req, res) => {
         searchText = req.query.searchText.toString()
     }
     catch (e) {
-        console.error('searchText parameter is not formatted properly')
-        return res.status(400).json({ error: 'searchText parameter is not formatted properly' })
+        return res.status(400).json({ error: errorMessages.searchTextIncorrectlyFormatted })
     }
 
     let user = null
     try {
         user = await User.findById(req.userId)
     } catch (e) {
-        return res.status(400).json('User associated with summary not found, if you have an account try logging out and back in')
+        return res.status(400).json({ error: errorMessages.noUserForSummary })
     }
 
     let matchingSummaries = []
@@ -62,7 +60,6 @@ exports.findSummaryFromTitle = async (req, res) => {
         matchingSummaries = await Summary.find({ user: user, title: { $regex: RegExp(searchText, 'i') } }) // i = case insensitive
     }
     catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while searching users summaries: ' + e.message })
     }
 
@@ -76,12 +73,12 @@ exports.updateSummary = async (req, res) => {
         const { summaryId, newTitle = null, newSummary = null, newOptionsDict = null } = req.body
 
         if (!newTitle && !newSummary && !newOptionsDict) {
-            return res.status(400).json({ error: 'No fields provided to update' })
+            return res.status(400).json({ error: errorMessages.noUpdateFields })
         }
 
         const summary = await Summary.findById(summaryId)
         if (!summary) {
-            return res.status(404).json({ error: 'Summary not found' })
+            return res.status(404).json({ error: errorMessages.summaryNotFound })
         }
 
         // need to create the new Options object if we are updating
@@ -92,8 +89,7 @@ exports.updateSummary = async (req, res) => {
                 newOptions = await Options.createNewOptions(newOptionsDict)
                 newOptions.save()
             } catch (e) {
-                console.error(e.message)
-                return res.status(400).json({ error: 'Failed to parse options argument, ensure request is properly formatted' })
+                return res.status(400).json({ error: errorMessages.failedToParseOptions })
             }
 
             await Options.findByIdAndRemove(summary.options._id)
@@ -112,7 +108,6 @@ exports.updateSummary = async (req, res) => {
         return res.status(200).json({ message: 'Successfully updated summary', updatedSummary: summary })
     }
     catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while updating summary title: ' + e.message })
     }
 }
@@ -123,12 +118,11 @@ exports.deleteSummary = async (req, res) => {
 
         const deletedSummary = await Summary.findByIdAndRemove(summaryId, { new: true })
         if (!deletedSummary) {
-            return res.status(404).json({ error: 'Summary not found' })
+            return res.status(404).json({ error: errorMessages.summaryNotFound })
         }
 
         return res.status(200).json({ message: 'Successfully deleted summary' })
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while deleting summary: ' + e.message })
     }
 }
@@ -141,7 +135,6 @@ exports.createSummary = async (req, res) => {
     try {
         user = await User.findById(userId)
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
     }
 
@@ -150,7 +143,6 @@ exports.createSummary = async (req, res) => {
         options = await Options.createNewOptions(optionsDict)
         options.save()
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + '/n' + errorMessages.ensureValidOptions })
     }
 
@@ -164,7 +156,6 @@ exports.createSummary = async (req, res) => {
         })
         savedSummary = await newSummary.save()
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while saving summary: ' + e.message })
     }
 

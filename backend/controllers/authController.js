@@ -16,7 +16,6 @@ exports.login = async (req, res) => {
     try {
         user = await User.login(email, password)
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ e: e.message })
     }
     const token = createToken(user._id)
@@ -29,7 +28,6 @@ exports.register = async (req, res) => {
     try {
         user = await User.register(email, password)
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ e: e.message })
     }
     const token = createToken(user._id)
@@ -50,7 +48,6 @@ exports.updateOpenAiKey = async (req, res) => {
             }
         })
         .catch((e) => {
-            console.error(e.message)
             return res.status(400).json({ e: e.message })
         })
 }
@@ -87,7 +84,6 @@ exports.updatePassword = async (req, res) => {
         await user.updatePassword(newPassword)
         return res.status(200).json({ message: 'Successfully updated password for user with id: ' + userId })
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ e: e.message })
     }
 }
@@ -105,7 +101,6 @@ exports.updateEmail = async (req, res) => {
         await user.updateEmail(newEmail)
         return res.status(200).json({ message: 'Successfully updated email for user with id: ' + userId })
     } catch (e) {
-        console.error(e.message)
         return res.status(400).json({ e: e.message })
     }
 }
@@ -121,7 +116,6 @@ exports.deleteUser = async (req, res) => {
             return res.status(200).json({ message: 'Successfully deleted user with id: ' + userId })
         })
         .catch((e) => {
-            console.error(e.message)
             return res.status(400).json({ e: errorMessages.failedToDeleteUser })
         })
 }
