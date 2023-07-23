@@ -41,11 +41,9 @@ app.use((req, res) => {
     return res.status(404).json({ error: 'Route not found' });
 });
 
-// check for and log errors
+// check for errors
 app.use((err, req, res, next) => {
-    console.error('ERROR: ', err); // Log the error for debugging purposes
-
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error: ' + err });
 });
 
 // listen for request to backend

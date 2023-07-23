@@ -15,6 +15,12 @@ const attemptedToDeleteUserThatDoesntExist = "Attempted to delete user that does
 const unableToParseOptions = "Unable to parse options dictionary to json"
 const ensureValidOptions = "Ensure you are passing in a valid options dictionary"
 
+const summaryNotFound = 'Summary not found'
+const searchTextIncorrectlyFormatted = 'searchText parameter is not formatted properly'
+const noUserForSummary = 'User associated with summary not gound (if you believe this is an error try logging out and back in)'
+const noUpdateFields = 'No fields provided to update'
+const failedToParseOptions = 'Failed to parse options argument, ensure request is properly formatted'
+
 // for when there is no auth header
 const authorizationRequired = 'You must be logged in to access this endpoint (authorization header not found, token is needed)'
 // for when there is an auth header but the token is invalid
@@ -44,4 +50,9 @@ module.exports = {
     attemptedToDeleteUserThatDoesntExist,
     unableToParseOptions,
     ensureValidOptions,
+    summaryNotFound,
+    searchTextIncorrectlyFormatted,
+    noUserForSummary,
+    noUpdateFields,
+    failedToParseOptions,
 }
