@@ -4,24 +4,25 @@ const Options = require('../models/Options')
 const errorMessages = require('../utils/error_messages')
 
 exports.fetchAllFromUser = async (req, res) => {
-    // fetch all from user in chronological order
+    // returns oldest first by default, returns most recent first if the url param mostRecent === 'true'
+    const mostRecent = req.query.mostRecent || 'false'  // mostRecent is a string (can't pass a bool through url params)
+
+    try {
+        let user = await User.findById(req.userId)
+    } catch (e) {
+        return res.status(400).json('User not found, try logging out and logging in if you think this is an error')
+    }
+
     let summaries = []
     try {
-        summaries = await Summary.find({ user: req.userId }).sort({ dateCreated: 1 })
-
-        // reverse date order if requested
-        if ('reverse' in req.query) {
-            if (req.query.reverse === 'true') {
-                summaries.sort({ dateCreated: -1 })
-            }
-        }
+        summaries = (mostRecent === 'true') ?
+            await Summary.find({ user: req.userId }).sort({ createdAt: -1 }).exec() :
+            await Summary.find({ user: req.userId }).sort({ createdAt: 1 }).exec()
     }
     catch (e) {
-        console.error(e.message)
         return res.status(400).json({ error: 'The following error occurred while getting users summaries: ' + e.message })
     }
 
-    console.log(summaries)
     return res.status(200).json(summaries)
 }
 
@@ -106,7 +107,6 @@ exports.updateSummary = async (req, res) => {
             title: newTitle || summary.title,
             summary: newSummary || summary.summary,
             options: newOptions || summary.options,
-            dateCreated: new Date()
         }, { new: true })
 
         return res.status(200).json({ message: 'Successfully updated summary', updatedSummary: summary })
