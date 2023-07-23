@@ -1,3 +1,4 @@
+require('dotenv').config()
 const mongoose = require('mongoose')
 const mongooseFieldEncryption = require("mongoose-field-encryption").fieldEncryption;
 const bcrypt = require('bcrypt')
@@ -24,11 +25,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    dateCreated: {
-        type: Date,
-        required: true,
-        default: Date.now,
+},
+    {
+        timestamps: true  // automatically adds createdAt and updatedAt fields (they are Date objects)
+    })
+
+// delete all summaries associated with a user if the user is deleted
+userSchema.pre('remove', async function (next) {
+    try {
+        const user = this
+        await user.model('Summary').deleteMany({ user: user._id })
+    } catch (e) {
+        throw new Error('The following error occurred while deleting summaries associated with user being deleted: ' + e.message)
     }
+    next()
 })
 
 // this encryption will introduce another field, __enc_openai_key which is true if the openai_key is encrypted
@@ -94,8 +104,9 @@ userSchema.methods.updatePassword = async function (newPassword) {
 
     // return error if current password is the same as the new password
     const curPassword = this.hashed_password
-    if (bcrypt.compare(curPassword, newPassword)) {
-        throw new Error('new password must be different than the current password')
+
+    if (await bcrypt.compare(newPassword, curPassword)) {
+        throw new Error(errorMessages.newPasswordMustBeDifferent)
     }
 
     // salt: random string added to password before hashing to make it more secure
@@ -116,7 +127,7 @@ userSchema.methods.updateEmail = async function (newEmail) {
     // return error if current email is the same as the new email
     const curEmail = this.email
     if (curEmail === newEmail) {
-        throw new Error('new email must be different than the current email')
+        throw new Error(errorMessages.newEmailMustBeDifferent)
     }
 
     this.email = newEmail

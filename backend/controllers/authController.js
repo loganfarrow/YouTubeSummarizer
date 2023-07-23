@@ -1,3 +1,4 @@
+require('dotenv').config()
 const User = require('../models/User')
 const errorMessages = require('../utils/error_messages')
 const jwt = require('jsonwebtoken')
@@ -11,28 +12,26 @@ const createToken = (_id) => {
 
 exports.login = async (req, res) => {
     const { email, password } = req.body
-
+    let user = null
     try {
-        const user = await User.login(email, password)
-        const token = createToken(user._id)
-        res.status(200).json({ email, user, token })
+        user = await User.login(email, password)
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ e: e.message })
+        return res.status(400).json({ e: e.message })
     }
+    const token = createToken(user._id)
+    return res.status(200).json({ email, token })
 }
 
 exports.register = async (req, res) => {
     const { email, password } = req.body
-
+    let user = null
     try {
-        const user = await User.register(email, password)
-        const token = createToken(user._id)
-        res.status(200).json({ email, user, token })
+        user = await User.register(email, password)
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ e: e.message })
+        return res.status(400).json({ e: e.message })
     }
+    const token = createToken(user._id)
+    return res.status(200).json({ email, token })
 }
 
 exports.updateOpenAiKey = async (req, res) => {
@@ -45,12 +44,11 @@ exports.updateOpenAiKey = async (req, res) => {
             if (!updatedUser) {
                 throw new Error(errorMessages.userDoesNotExistForId)
             } else {
-                res.status(200).json({ message: 'Successfully updated openai key for user with id: ' + userId })
+                return res.status(200).json({ message: 'Successfully updated openai key for user with id: ' + userId })
             }
         })
         .catch((e) => {
-            console.error(e.message)
-            res.status(400).json({ e: e.message })
+            return res.status(400).json({ e: e.message })
         })
 }
 
@@ -58,35 +56,35 @@ exports.fetchUser = async (req, res) => {
     // return email, date created
     const { userId } = req
 
-    const user = User.findById(userId)
+    const user = await User.findById(userId)
+
     if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     // we use toIsoString because if the frontend has an ISO formatted string they 
     // can get a date object by just passing the ISO string to the date constructor
-    res.status(200).json({ email: user.email, dateCreated: user.date_created.toISOString() })
+    return res.status(200).json({ email: user.email, createdAt: user.createdAt.toISOString() })
 }
 
 exports.updatePassword = async (req, res) => {
     const { userId } = req
     const { newPassword } = req.body
-    
+
     if (!newPassword) {
-        res.status(400).json({ e: 'newPassword is required in request body'})
+        return res.status(400).json({ e: errorMessages.newPasswordRequired })
     }
 
-    const user = User.findById(userId)
+    const user = await User.findById(userId)
     if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     try {
-        user.updatePassword(newPassword)
-        res.status(200).json({ message: 'Successfully updated password for user with id: ' + userId })
+        await user.updatePassword(newPassword)
+        return res.status(200).json({ message: 'Successfully updated password for user with id: ' + userId })
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ e: e.message })
+        return res.status(400).json({ e: e.message })
     }
 }
 
@@ -94,34 +92,30 @@ exports.updateEmail = async (req, res) => {
     const { userId } = req
     const { newEmail } = req.body
 
-    const user = User.findById(userId)
+    const user = await User.findById(userId)
     if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
+        return res.status(400).json({ e: errorMessages.userDoesNotExistForId })
     }
 
     try {
-        user.updateEmail(newEmail)
-        res.status(200).json({ message: 'Successfully updated email for user with id: ' + userId })
+        await user.updateEmail(newEmail)
+        return res.status(200).json({ message: 'Successfully updated email for user with id: ' + userId })
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ e: e.message })
+        return res.status(400).json({ e: e.message })
     }
 }
 
 exports.deleteUser = async (req, res) => {
     const { userId } = req
 
-    const user = User.findById(userId)
-    if (!user) {
-        res.status(400).json({ e: errorMessages.userDoesNotExistForId })
-    }
-
-    try {
-        await User.findByIdAndDelete(userId)
-        res.status(200).json({ message: 'Successfully deleted user with id: ' + userId })
-    } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ e: errorMessages.failedToDeleteUser })
-    }
-    
+    User.deleteOne({ _id: userId })
+        .then((result) => {
+            if (result.deletedCount === 0) {
+                return res.status(400).json({ e: errorMessages.attemptedToDeleteUserThatDoesntExist })
+            }
+            return res.status(200).json({ message: 'Successfully deleted user with id: ' + userId })
+        })
+        .catch((e) => {
+            return res.status(400).json({ e: errorMessages.failedToDeleteUser })
+        })
 }

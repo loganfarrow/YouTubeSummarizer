@@ -1,5 +1,3 @@
-// TODO figure out authentication endpoints
-
 require('dotenv').config()
 const express = require('express')
 const authController = require('../controllers/authController')
@@ -19,10 +17,13 @@ router.post('/login', authController.login)
 
 router.post('/register', authController.register)
 
+// get email and date created of user
 router.get('/fetchUser', authController.fetchUser)
 
+// update user's openai key (also checks that new key is a valid openai key)
 router.patch('/updateOpenAiKey', authController.updateOpenAiKey)
 
+// checks that new password is strong, not equal to current password, and updates user's password
 router.patch('/updatePassword', authController.updatePassword)
 
 router.patch('/updateEmail', authController.updateEmail)

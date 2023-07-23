@@ -2,9 +2,6 @@ const mongoose = require('mongoose')
 
 /*
     Schmema for Summary Objects
-        title
-        summary
-        options: map of user-selectable options (for example, bullet_points = true, n_bullet_points = 5, academic_tone = true, explanation_age = 5, length = "short", and other options that affect summary prompt)
 
 */
 
@@ -18,18 +15,27 @@ const summarySchema = new mongoose.Schema({
         required: true,
     },
     options: {
-        type: Map,
-        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Options',
     },
-    dateCreated: {
-        type: Date,
-        required: true,
-        default: Date.now,
-    },
-    user: {
+    user: {    // this is really the users id
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+    },
+},
+{
+    timestamps: true  // automatically adds createdAt and updatedAt fields (they are Date objects)
+})
+
+// delete the options object associated with a summary if the summary is deleted
+summarySchema.pre('remove', async function (next) {
+    try {
+        const summary = this
+        await summary.model('Options').findByIdAndRemove(summary.options._id)
+    } catch (e) {
+        throw new Error('The following error occurred while deleting options object associated with summary being deleted: ' + e.message)
     }
+    next()
 })
 
 // define how it is serialized
