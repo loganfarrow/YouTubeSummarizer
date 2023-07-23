@@ -1,105 +1,149 @@
 const Summary = require('../models/Summary')
 const User = require('../models/User')
+const Options = require('../models/Options')
+const errorMessages = require('../utils/error_messages')
 
 exports.fetchAllFromUser = async (req, res) => {
-    // fetch all from user in chronological order
+    // returns oldest first by default, returns most recent first if the url param mostRecent === 'true'
+    const mostRecent = req.query.mostRecent || 'false'  // mostRecent is a string (can't pass a bool through url params)
+
+    try {
+        let user = await User.findById(req.userId)
+    } catch (e) {
+        return res.status(400).json(errorMessages.userDoesNotExistForId)
+    }
+
     let summaries = []
     try {
-        summaries = await Summary.find({ user: req.userId }).sort({ dateCreated: 1 })
-
-        // reverse date order if requested
-        if ('reverse' in req.query) {
-            if (req.query.reverse === 'true') {
-                summaries.sort({ dateCreated: -1 })
-            }
-        }
+        summaries = (mostRecent === 'true') ?
+            await Summary.find({ user: req.userId }).sort({ createdAt: -1 }).exec() :
+            await Summary.find({ user: req.userId }).sort({ createdAt: 1 }).exec()
     }
     catch (e) {
-        console.error(e.message)
-        res.status(400).json({ error: 'The following error occurred while getting users summaries: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while getting users summaries: ' + e.message })
     }
 
-    console.log(summaries)
-    res.status(200).json(summaries)
+    return res.status(200).json(summaries)
 }
 
 exports.fetchSummary = async (req, res) => {
     try {
-        const summaryId = req.summaryId
+        const summaryId = req.query.summaryId.toString()
         const summary = await Summary.findById(summaryId)
-        res.status(200).json(summary)
+        if (!summary) {
+            return res.status(404).json({ error: errorMessages.summaryNotFound })
+        }
+        return res.status(200).json(summary)
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ error: 'The following error occurred while getting summary: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while getting summary: ' + e.message })
     }
 }
 
-exports.findSummaryFromText = async (req, res) => {
+exports.findSummaryFromTitle = async (req, res) => {
     let searchText = ''
     try {
-        searchText = req.query('searchText').toString()
+        searchText = req.query.searchText.toString()
     }
     catch (e) {
-        console.error('searchText parameter is not formatted properly')
-        res.status(400).json({ error: 'searchText parameter is not formatted properly' })
+        return res.status(400).json({ error: errorMessages.searchTextIncorrectlyFormatted })
+    }
+
+    let user = null
+    try {
+        user = await User.findById(req.userId)
+    } catch (e) {
+        return res.status(400).json({ error: errorMessages.noUserForSummary })
     }
 
     let matchingSummaries = []
     try {
-        matchingSummaries = await Summary.find({ user: req.userId, title: { $regex: searchText, $options: 'i' } })
+        matchingSummaries = await Summary.find({ user: user, title: { $regex: RegExp(searchText, 'i') } }) // i = case insensitive
     }
     catch (e) {
-        console.error(e.message)
-        res.status(400).json({ error: 'The following error occurred while searching users summaries: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while searching users summaries: ' + e.message })
     }
 
-    res.status(200).json({ summaries: matchingSummaries })
+    return res.status(200).json({ summaries: matchingSummaries })
 }
 
-exports.updateSummaryTitle = async (req, res) => {
+exports.updateSummary = async (req, res) => {
     try {
-        const summaryId = req.summaryId
-        const newTitle = req.body.title
-        await Summary.findByIdAndUpdate(summaryId, { title: newTitle }, (err, updatedSummary) => {
-            if (!updatedSummary) { res.status(404).json({ error: 'Summary not found' }) }
-        })
+
+        // since each parameter is optional (except the id), we want to set them to null if not provided (else they will be undefined)
+        const { summaryId, newTitle = null, newSummary = null, newOptionsDict = null } = req.body
+
+        if (!newTitle && !newSummary && !newOptionsDict) {
+            return res.status(400).json({ error: errorMessages.noUpdateFields })
+        }
+
+        const summary = await Summary.findById(summaryId)
+        if (!summary) {
+            return res.status(404).json({ error: errorMessages.summaryNotFound })
+        }
+
+        // need to create the new Options object if we are updating
+        // should also delete the old options object if we are updating
+        let newOptions = null
+        if (newOptionsDict) {
+            try {
+                newOptions = await Options.createNewOptions(newOptionsDict)
+                newOptions.save()
+            } catch (e) {
+                return res.status(400).json({ error: errorMessages.failedToParseOptions })
+            }
+
+            await Options.findByIdAndRemove(summary.options._id)
+
+            // update the summary with the new options object
+            await Summary.findByIdAndUpdate(summaryId, { options: newOptions }, { new: true })
+        }
+
+        // we update the fields that are provided and leave the rest the same (a || b means if a is null we use b)
+        await Summary.findByIdAndUpdate(summaryId, {
+            title: newTitle || summary.title,
+            summary: newSummary || summary.summary,
+            options: newOptions || summary.options,
+        }, { new: true })
+
+        return res.status(200).json({ message: 'Successfully updated summary', updatedSummary: summary })
     }
     catch (e) {
-        console.error(e.message)
-        res.status(400).json({ error: 'The following error occurred while updating summary title: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while updating summary title: ' + e.message })
     }
 }
 
 exports.deleteSummary = async (req, res) => {
     try {
-        const summaryId = req.params.summaryId
-        await Summary.findByIdAndRemove(summaryId, (err, deletedSummary) => {
-            if (!deletedSummary) { res.status(404).json({ error: 'Summary not found' }) }
-        })
-        res.status(200).json({ message: 'Successfully deleted summary' })
+        const { summaryId } = req.body
+
+        const deletedSummary = await Summary.findByIdAndRemove(summaryId, { new: true })
+        if (!deletedSummary) {
+            return res.status(404).json({ error: errorMessages.summaryNotFound })
+        }
+
+        return res.status(200).json({ message: 'Successfully deleted summary' })
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ error: 'The following error occurred while deleting summary: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while deleting summary: ' + e.message })
     }
 }
 
 exports.createSummary = async (req, res) => {
-    const { title, summary, options } = req.body
+    const { title, summary, options: optionsDict } = req.body
     const userId = req.userId
 
     let user = null
     try {
         user = await User.findById(userId)
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
     }
 
-    let optionsJSON = ''
+    let options = {}
     try {
-        optionsJSON = JSON.parse(options)
-    } catch {
-        console.error('UNable to parse summary options dictionary to JSON')
+        options = await Options.createNewOptions(optionsDict)
+        options.save()
+    } catch (e) {
+        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + '/n' + errorMessages.ensureValidOptions })
     }
 
     let savedSummary = null
@@ -107,16 +151,15 @@ exports.createSummary = async (req, res) => {
         const newSummary = new Summary({
             title: title,
             summary: summary,
-            options: optionsJSON,
+            options: options,
             user: user
         })
         savedSummary = await newSummary.save()
     } catch (e) {
-        console.error(e.message)
-        res.status(400).json({ error: 'The following error occurred while saving summary: ' + e.message })
+        return res.status(400).json({ error: 'The following error occurred while saving summary: ' + e.message })
     }
 
-    res.status(200).json({
+    return res.status(200).json({
         message: 'Summary successfully created',
         summary: savedSummary
     })
@@ -133,5 +176,8 @@ exports.generateSummary = async (req, res) => {
     // implement logic here (or add a function from the utils folder)
     // to get the prompt to use based on the user's selected options
 
-    res.status(200).json({ message: 'generateSummary endpoint not implemented yet' })
+    // TODO need to also use a summarizer to get title
+    // does openai provide the title of the summary?
+
+    return res.status(200).json({ message: 'generateSummary endpoint not implemented yet' })
 }
