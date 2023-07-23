@@ -67,7 +67,7 @@ exports.fetchUser = async (req, res) => {
 
     // we use toIsoString because if the frontend has an ISO formatted string they 
     // can get a date object by just passing the ISO string to the date constructor
-    return res.status(200).json({ email: user.email, dateCreated: user.dateCreated.toISOString() })
+    return res.status(200).json({ email: user.email, createdAt: user.createdAt.toISOString() })
 }
 
 exports.updatePassword = async (req, res) => {
