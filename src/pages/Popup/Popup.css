@@ -39,7 +39,61 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Make tabs sit next to each other */
+.nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  list-style-type: none;
+
+
+}
+
+/* Add rounded corners to the tabs */
+.nav-item {
+  border-radius: 5px;
+}
+
+/* Styling for the active tab */
+.nav-item.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Styling for the non-active tabs */
+.nav-item:not(.active) {
+  background-color: #f8f9fa;
+  color: black;
+}
+
+/* Styling for the content of each tab */
+.tab-pane {
+  padding: 15px;
+}
+
+.nav.nav-tabs {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.nav.nav-tabs .nav-item {
+  border-radius: 5px;
+  margin: 0 10px;
+  /* Add some space between the tabs */
+}
+
+.nav.nav-tabs .nav-item .nav-link {
+  color: black;
+  background-color: #f8f9fa;
+}
+
+.nav.nav-tabs .nav-item .nav-link.active {
+  color: white;
+  background-color: #007bff;
 }

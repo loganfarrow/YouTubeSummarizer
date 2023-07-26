@@ -1,24 +1,18 @@
 import React from 'react';
-import logo from '../../assets/img/logo.svg';
-import Greetings from '../../containers/Greetings/Greetings';
 import './Popup.css';
-
+import { Tab, Tabs } from 'react-bootstrap';
 const Popup = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/pages/Popup/Popup.jsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React!
-        </a>
+        <p>YouTube Summarizer</p>
+        <Tabs defaultActiveKey="summary" id="uncontrolled-tab-example" className="mb-3">
+          <Tab eventKey="summary" title="Summary">
+            <textarea placeholder="I need pretty CSS config bad. Logan is not good at design" />
+          </Tab>
+          <Tab eventKey="settings" title="Settings">
+          </Tab>
+        </Tabs>
       </header>
     </div>
   );
