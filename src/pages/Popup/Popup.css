@@ -1,3 +1,5 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css";
+
 .App {
   position: absolute;
   top: 0px;
@@ -10,90 +12,22 @@
   background-color: #282c34;
 }
 
-.App-logo {
-  height: 30vmin;
-  pointer-events: none;
+.title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  height: 100%;
+.buttons {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 10px;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Make tabs sit next to each other */
-.nav {
+.textarea-container,
+.button-container {
   display: flex;
-  flex-direction: row;
-  justify-content: start;
-  list-style-type: none;
-
-
-}
-
-/* Add rounded corners to the tabs */
-.nav-item {
-  border-radius: 5px;
-}
-
-/* Styling for the active tab */
-.nav-item.active {
-  background-color: #007bff;
-  color: white;
-}
-
-/* Styling for the non-active tabs */
-.nav-item:not(.active) {
-  background-color: #f8f9fa;
-  color: black;
-}
-
-/* Styling for the content of each tab */
-.tab-pane {
-  padding: 15px;
-}
-
-.nav.nav-tabs {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.nav.nav-tabs .nav-item {
-  border-radius: 5px;
-  margin: 0 10px;
-  /* Add some space between the tabs */
-}
-
-.nav.nav-tabs .nav-item .nav-link {
-  color: black;
-  background-color: #f8f9fa;
-}
-
-.nav.nav-tabs .nav-item .nav-link.active {
-  color: white;
-  background-color: #007bff;
+  justify-content: center;
+  margin-top: 10px;
 }
