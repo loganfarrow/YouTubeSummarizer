@@ -31,6 +31,9 @@ const noOpenaiKeyProvided = 'No openai key provided for endpoint that requires a
 // for when openai key is provided, but it is invalid
 const invalidOpenaiKeyProvided = 'Invalid openai key provided for endpoint that requires a valid openai key'
 
+const openaiGenerateSummaryCallFailed = 'Call to openai api to generate summary failed'
+const userHasNoOpenaiKey = 'User somehow has no openai key associated with their account'
+
 module.exports = {
     provideEmailAndPasswordToRegister,
     provideValidEmailToRegister,
@@ -55,4 +58,6 @@ module.exports = {
     noUserForSummary,
     noUpdateFields,
     failedToParseOptions,
+    openaiGenerateSummaryCallFailed,
+    userHasNoOpenaiKey,
 }
