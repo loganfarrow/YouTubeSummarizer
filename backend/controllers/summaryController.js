@@ -2,6 +2,8 @@ const Summary = require('../models/Summary')
 const User = require('../models/User')
 const Options = require('../models/Options')
 const errorMessages = require('../utils/error_messages')
+const axios = require('axios')
+const { getPrompt, customInstructions } = require('../utils/prompting')
 
 exports.fetchAllFromUser = async (req, res) => {
     // returns oldest first by default, returns most recent first if the url param mostRecent === 'true'
@@ -127,10 +129,101 @@ exports.deleteSummary = async (req, res) => {
     }
 }
 
-exports.createSummary = async (req, res) => {
-    const { title, summary, options: optionsDict } = req.body
+exports.generateSummary = async (req, res) => {
+    // generating and creating the summary should be handled in the same endpoint
+
+    // get the userId, return error if user/userId invalid
     const userId = req.userId
 
+    let user = null
+    try {
+        user = await User.findById(userId)
+    } catch (e) {
+        return res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
+    }
+
+    // check that user has an associated openai key and that it is valid, return error if not
+    // note: we check that keys are valid when user is created or they update their key, but we need to check that they're sitll valid before using them
+    if (user.openai_key === undefined || !user.openai_key) {
+        return res.status(401).json({ error: errorMessages.userHasNoOpenaiKey })
+    }
+    
+    const validKeyResponse = await axios.get('https://api.openai.com/v1/usage', {
+        headers: {
+            'Authorization': `Bearer ${openaiKey}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (validKeyResponse.status !== 200) {
+        return res.status(401).json({ error: errorMessages.invalidOpenaiKeyProvided })
+    }
+
+    // get the options from request body, attempt to create options object, error if invalid
+    let options = {}
+    try {
+        options = await Options.createNewOptions(optionsDict)
+        options.save()
+    } catch (e) {
+        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + '/n' + errorMessages.ensureValidOptions })
+    }
+
+    // call a helper function here that gets prompt based on user's options
+    let prompt = ''
+    try {
+        prompt = getPrompt(options)
+    } catch (e) {
+        return res.status(400).json({ error: 'The following error occurred while generating prompt from user-selected options: ' + e.message })
+    }
+    
+
+    // call openai api with prompt and key
+    const systemMessage = { role: 'system', content: customInstructions }
+    const userMessage = { role: 'user', content: prompt }
+    let summary = ''
+    try {
+        openai.apiKey = openaiKey
+        const response = await openai.Completion.create({
+            model: 'gpt-3.5-turbo',
+            messages: [systemMessage, userMessage],
+        });
+        summary = response.choices[0].message.content
+    } catch (e) {
+        return res.status(401).json({ error: 'call to openai api to generate summary failed with error: ' + e.message})
+    }
+
+    if (summary === '') {
+        return res.status(401).json({ error: 'summary returned from openai api was empty' })
+    }
+
+    // TODO the title should be the video's title
+    const title = ''
+
+    // create summary object with the response and save it to the database
+    // TODO move the logic from exports.createSummary to here (and delete it after doing this)
+    let savedSummary = null
+    try {
+        const newSummary = new Summary({
+            title: title,
+            summary: summary,
+            options: options,
+            user: user
+        })
+        savedSummary = await newSummary.save()
+    } catch (e) {
+        return res.status(400).json({ error: 'The following error occurred while saving summary: ' + e.message })
+    }
+
+    return res.status(200).json({
+        message: 'Summary successfully created',
+        summary: savedSummary
+    })
+}
+
+exports.createSummary = async (req, res) => {
+    const { title, summary, options: optionsDict } = req.body
+    
+    const userId = req.userId
     let user = null
     try {
         user = await User.findById(userId)
@@ -163,21 +256,4 @@ exports.createSummary = async (req, res) => {
         message: 'Summary successfully created',
         summary: savedSummary
     })
-}
-
-exports.generateSummary = async (req, res) => {
-    // get the userId and lookup corresponding openai key
-    // return an error message / response if they don't have a key
-    // key won't be invalid because we check for that before saving it to the user
-
-    // get the options from the request body (pass them as key value pairs?)
-
-    // TODO
-    // implement logic here (or add a function from the utils folder)
-    // to get the prompt to use based on the user's selected options
-
-    // TODO need to also use a summarizer to get title
-    // does openai provide the title of the summary?
-
-    return res.status(200).json({ message: 'generateSummary endpoint not implemented yet' })
 }

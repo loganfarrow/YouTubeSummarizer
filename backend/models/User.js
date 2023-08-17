@@ -41,6 +41,7 @@ userSchema.pre('remove', async function (next) {
     next()
 })
 
+// doing this means encryption is automatically handled (automatically decrypted when accessed)
 // this encryption will introduce another field, __enc_openai_key which is true if the openai_key is encrypted
 userSchema.plugin(mongooseFieldEncryption, {
     fields: ["openai_key"],
