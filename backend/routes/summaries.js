@@ -39,9 +39,6 @@ router.patch('/updateSummary', summaryController.updateSummary)
 // delete specific summary
 router.delete('/deleteSummary', summaryController.deleteSummary)
 
-// create new summary associated with user
-router.post('/createSummary', summaryController.createSummary)
-
 // takes user's choices for summary options and makes call to openai to generate summary
 router.post('/generateSummary', summaryController.generateSummary)
 
