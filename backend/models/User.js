@@ -48,6 +48,15 @@ userSchema.plugin(mongooseFieldEncryption, {
     secret: process.env.ENCRYPTION_SECRET,
 })
 
+// when turned into JSON and sent to frontend, we don't want to send hashed_password, openai_key, or __enc_openai_key
+userSchema.set('toJSON', {
+    transform: function (doc, ret, options) {
+        delete ret.hashed_password
+        delete ret.openai_key
+        delete ret.__enc_openai_key
+    }
+})
+
 userSchema.statics.register = async function (email, password, openaikey) {
     if (!email || !password || !openaikey) {
         throw new Error(errorMessages.provideEmailAndPasswordToRegister)
