@@ -22,6 +22,10 @@ const summarySchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    video_url: {
+        type: String,
+        required: true,
+    }
 },
 {
     timestamps: true  // automatically adds createdAt and updatedAt fields (they are Date objects)
