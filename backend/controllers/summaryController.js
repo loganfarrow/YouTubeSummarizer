@@ -69,52 +69,6 @@ exports.findSummaryFromTitle = async (req, res) => {
     return res.status(200).json({ summaries: matchingSummaries })
 }
 
-exports.updateSummary = async (req, res) => {
-    try {
-
-        // since each parameter is optional (except the id), we want to set them to null if not provided (else they will be undefined)
-        const { summaryId, newTitle = null, newSummary = null, newOptionsDict = null } = req.body
-
-        if (!newTitle && !newSummary && !newOptionsDict) {
-            return res.status(400).json({ error: errorMessages.noUpdateFields })
-        }
-
-        const summary = await Summary.findById(summaryId)
-        if (!summary) {
-            return res.status(404).json({ error: errorMessages.summaryNotFound })
-        }
-
-        // need to create the new Options object if we are updating
-        // should also delete the old options object if we are updating
-        let newOptions = null
-        if (newOptionsDict) {
-            try {
-                newOptions = await Options.createNewOptions(newOptionsDict)
-                newOptions.save()
-            } catch (e) {
-                return res.status(400).json({ error: errorMessages.failedToParseOptions })
-            }
-
-            await Options.findByIdAndRemove(summary.options._id)
-
-            // update the summary with the new options object
-            await Summary.findByIdAndUpdate(summaryId, { options: newOptions }, { new: true })
-        }
-
-        // we update the fields that are provided and leave the rest the same (a || b means if a is null we use b)
-        await Summary.findByIdAndUpdate(summaryId, {
-            title: newTitle || summary.title,
-            summary: newSummary || summary.summary,
-            options: newOptions || summary.options,
-        }, { new: true })
-
-        return res.status(200).json({ message: 'Successfully updated summary', updatedSummary: summary })
-    }
-    catch (e) {
-        return res.status(400).json({ error: 'The following error occurred while updating summary title: ' + e.message })
-    }
-}
-
 exports.deleteSummary = async (req, res) => {
     try {
         const { summaryId } = req.body
@@ -179,6 +133,7 @@ exports.generateSummary = async (req, res) => {
     let prompt = ''
     let url = ''
     try {
+        const { url } = req.body
         prompt = await getPrompt(options, url)
     } catch (e) {
         return res.status(400).json({ error: 'The following error occurred while generating prompt from user-selected options: ' + e.message })
@@ -216,7 +171,8 @@ exports.generateSummary = async (req, res) => {
             title: title,
             summary: summary,
             options: options,
-            user: user
+            user: user,
+            video_url: url, // we don't need to check if this is a valid url because generateSummary would have already failed
         })
         savedSummary = await newSummary.save()
     } catch (e) {
@@ -227,4 +183,53 @@ exports.generateSummary = async (req, res) => {
         message: 'Summary successfully created',
         summary: savedSummary
     })
+}
+
+
+// this is unnecessary, only saving this if we want to refactor it in the future
+// to allow somebody to edit the options on a summary and thereby regenerate it
+exports.updateSummary = async (req, res) => {
+    try {
+
+        // since each parameter is optional (except the id), we want to set them to null if not provided (else they will be undefined)
+        const { summaryId, newTitle = null, newSummary = null, newOptionsDict = null } = req.body
+
+        if (!newTitle && !newSummary && !newOptionsDict) {
+            return res.status(400).json({ error: errorMessages.noUpdateFields })
+        }
+
+        const summary = await Summary.findById(summaryId)
+        if (!summary) {
+            return res.status(404).json({ error: errorMessages.summaryNotFound })
+        }
+
+        // need to create the new Options object if we are updating
+        // should also delete the old options object if we are updating
+        let newOptions = null
+        if (newOptionsDict) {
+            try {
+                newOptions = await Options.createNewOptions(newOptionsDict)
+                newOptions.save()
+            } catch (e) {
+                return res.status(400).json({ error: errorMessages.failedToParseOptions })
+            }
+
+            await Options.findByIdAndRemove(summary.options._id)
+
+            // update the summary with the new options object
+            await Summary.findByIdAndUpdate(summaryId, { options: newOptions }, { new: true })
+        }
+
+        // we update the fields that are provided and leave the rest the same (a || b means if a is null we use b)
+        await Summary.findByIdAndUpdate(summaryId, {
+            title: newTitle || summary.title,
+            summary: newSummary || summary.summary,
+            options: newOptions || summary.options,
+        }, { new: true })
+
+        return res.status(200).json({ message: 'Successfully updated summary', updatedSummary: summary })
+    }
+    catch (e) {
+        return res.status(400).json({ error: 'The following error occurred while updating summary title: ' + e.message })
+    }
 }
