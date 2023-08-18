@@ -45,6 +45,7 @@ optionsSchema.statics.createNewOptions = async function (options) {
         tone: tone || 'standard',
         targetAge: targetAge || 'unspecified',
         bulletPoints: bulletPoints || false,
+        wordLimit: wordLimit || 500,
         paragraphLimit: paragraphLimit,
         bulletPointLimit: bulletPointLimit,
     })
