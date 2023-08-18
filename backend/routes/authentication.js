@@ -8,7 +8,7 @@ const router = express.Router()
 
 // apply requireAuth middleware to routes that require authentication
 const routesNeedingAuth = ['/updateOpenAiKey', '/updatePassword', '/updateEmail', '/deleteUser', '/fetchUser']
-const routesNeedingValidateOpenaiKey = ['/updateOpenAiKey']
+const routesNeedingValidateOpenaiKey = ['/updateOpenAiKey', '/register']
 
 router.use(routesNeedingAuth, requireAuth)
 router.use(routesNeedingValidateOpenaiKey, validateOpenaiKey)
