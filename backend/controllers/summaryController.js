@@ -133,7 +133,8 @@ exports.generateSummary = async (req, res) => {
     let prompt = ''
     let url = ''
     try {
-        const { url } = req.body
+        const { url: _url } = req.body
+        url = _url
         prompt = await getPrompt(options, url)
     } catch (e) {
         return res.status(400).json({ error: 'The following error occurred while generating prompt from user-selected options: ' + e.message })
