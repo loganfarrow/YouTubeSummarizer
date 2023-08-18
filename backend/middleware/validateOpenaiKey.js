@@ -1,28 +1,32 @@
 const errorMessages = require('../utils/error_messages')
 const axios = require('axios')
+const { OpenAI } = require('openai')
 const User = require('../models/User')
 
 const validateOpenaiKey = async (req, res, next) => {
     // validateOpenaiKey must always go after requireAuth middleware in router chain
     // we don't need to check if user is null because requireAuth middleware would have caught that
 
-    const openaiKey = req.body.openaiKey
+    const openaikey = req.body.openaikey
     
-    if (typeof openaiKey === 'undefined' || openaiKey === null) {
+    if (typeof openaikey === 'undefined' || openaikey === null) {
         return res.status(401).json({ error: errorMessages.noOpenaiKeyProvided })
     }
 
     // check that openai key is a valid openai key
-    const response = await axios.get('https://api.openai.com/v1/usage', {
-        headers: {
-            'Authorization': `Bearer ${openaiKey}`,
-            'Content-Type': 'application/json'
-        }
-    });
+    try {
+        const openai = new OpenAI({
+            apiKey: openaikey
+        })
+        
+        const userMessage = { role: 'user', content: "test prompt" }
+        await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [userMessage],
+        });
 
-    // return error if code was invalid
-    if (response.status !== 200) {
-        return res.status(401).json({ error: errorMessages.invalidOpenaiKeyProvided })
+    } catch (e) { // if error, then openai key is invalid
+        return res.status(401).json({ error: 'Validating users openai key failed with following message: ' + e.message })
     }
 
     next()

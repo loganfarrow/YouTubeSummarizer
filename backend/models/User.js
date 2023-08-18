@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     },
     openai_key: {
         type: String,
-        required: false,
+        required: true,
     },
 },
     {
@@ -48,10 +48,12 @@ userSchema.plugin(mongooseFieldEncryption, {
     secret: process.env.ENCRYPTION_SECRET,
 })
 
-userSchema.statics.register = async function (email, password) {
-    if (!email || !password) {
+userSchema.statics.register = async function (email, password, openaikey) {
+    if (!email || !password || !openaikey) {
         throw new Error(errorMessages.provideEmailAndPasswordToRegister)
     }
+
+    // note: we don't need to validate openai key as that has already been handled by validateOpenaiKey middleware
 
     if (!validator.isEmail(email)) {
         throw new Error(errorMessages.provideValidEmailToRegister)
@@ -74,6 +76,7 @@ userSchema.statics.register = async function (email, password) {
     const user = new this({
         email: email,
         hashed_password: hashed_password,
+        openai_key: openaikey,
     })
 
     await user.save()
