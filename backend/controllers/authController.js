@@ -23,10 +23,10 @@ exports.login = async (req, res) => {
 }
 
 exports.register = async (req, res) => {
-    const { email, password } = req.body
+    const { email, password, openaikey } = req.body
     let user = null
     try {
-        user = await User.register(email, password)
+        user = await User.register(email, password, openaikey)
     } catch (e) {
         return res.status(400).json({ e: e.message })
     }
