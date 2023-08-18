@@ -3,6 +3,7 @@ const User = require('../models/User')
 const Options = require('../models/Options')
 const errorMessages = require('../utils/error_messages')
 const axios = require('axios')
+const { OpenAI } = require('openai')
 const { getPrompt, customInstructions } = require('../utils/prompting')
 
 exports.fetchAllFromUser = async (req, res) => {
@@ -148,20 +149,26 @@ exports.generateSummary = async (req, res) => {
         return res.status(401).json({ error: errorMessages.userHasNoOpenaiKey })
     }
     
-    const validKeyResponse = await axios.get('https://api.openai.com/v1/usage', {
-        headers: {
-            'Authorization': `Bearer ${openaiKey}`,
-            'Content-Type': 'application/json'
-        }
-    });
+    // check that openai key is a valid openai key
+    try {
+        const openai = new OpenAI({
+            apiKey: user.openai_key
+        })
+        
+        const userMessage = { role: 'user', content: "test prompt" }
+        await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [userMessage],
+        });
 
-    if (validKeyResponse.status !== 200) {
-        return res.status(401).json({ error: errorMessages.invalidOpenaiKeyProvided })
+    } catch (e) { // if error, then openai key is invalid
+        return res.status(401).json({ error: 'Validating users openai key failed with following message: ' + e.message })
     }
 
     // get the options from request body, attempt to create options object, error if invalid
     let options = {}
     try {
+        const { options: optionsDict } = req.body
         options = await Options.createNewOptions(optionsDict)
         options.save()
     } catch (e) {
@@ -175,15 +182,17 @@ exports.generateSummary = async (req, res) => {
     } catch (e) {
         return res.status(400).json({ error: 'The following error occurred while generating prompt from user-selected options: ' + e.message })
     }
-    
 
     // call openai api with prompt and key
     const systemMessage = { role: 'system', content: customInstructions }
     const userMessage = { role: 'user', content: prompt }
     let summary = ''
     try {
-        openai.apiKey = openaiKey
-        const response = await openai.Completion.create({
+        const openai = new OpenAI({
+            apiKey: user.openai_key
+        })
+
+        const response = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [systemMessage, userMessage],
         });
@@ -197,48 +206,9 @@ exports.generateSummary = async (req, res) => {
     }
 
     // TODO the title should be the video's title
-    const title = ''
+    const title = 'title placeholder'
 
     // create summary object with the response and save it to the database
-    // TODO move the logic from exports.createSummary to here (and delete it after doing this)
-    let savedSummary = null
-    try {
-        const newSummary = new Summary({
-            title: title,
-            summary: summary,
-            options: options,
-            user: user
-        })
-        savedSummary = await newSummary.save()
-    } catch (e) {
-        return res.status(400).json({ error: 'The following error occurred while saving summary: ' + e.message })
-    }
-
-    return res.status(200).json({
-        message: 'Summary successfully created',
-        summary: savedSummary
-    })
-}
-
-exports.createSummary = async (req, res) => {
-    const { title, summary, options: optionsDict } = req.body
-    
-    const userId = req.userId
-    let user = null
-    try {
-        user = await User.findById(userId)
-    } catch (e) {
-        return res.status(400).json({ error: 'The following error occurred while getting user: ' + e.message })
-    }
-
-    let options = {}
-    try {
-        options = await Options.createNewOptions(optionsDict)
-        options.save()
-    } catch (e) {
-        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + '/n' + errorMessages.ensureValidOptions })
-    }
-
     let savedSummary = null
     try {
         const newSummary = new Summary({
