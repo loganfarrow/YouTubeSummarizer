@@ -58,6 +58,8 @@ async function getPrompt(options, url) {
 }
 
 function getYoutubeTranscript(url) {
+    let isResolved = false
+
     return new Promise((resolve, reject) => {
         const pythonProcess = spawn('python', ['utils/get_transcript.py', url]);
         transcript = ''
@@ -75,13 +77,17 @@ function getYoutubeTranscript(url) {
     
         // if the output stream closes, we're done generating the transcript and can return
         pythonProcess.stdout.on('end', () => {
+            isResolved = true
             resolve(transcript);
         });
 
         // if it takes longer than 25 seconds we just timeout and use what we have so far
         setTimeout(() => {
-            console.warn('generating youtube transcript took more than 25 seconds - we timed out and will use what we have so far')
-            resolve(transcript);
+            if (!isResolved) {
+                console.warn('generating youtube transcript took more than 25 seconds - we timed out and will use what we have so far')
+                isResolved = true
+                resolve(transcript);
+            }
         }, 25000); // 25 seconds
     })
     
