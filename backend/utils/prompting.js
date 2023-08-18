@@ -3,14 +3,26 @@ const { spawn } = require('child_process') // this is the module that allows us 
 
 const customInstructions = `
     I am going to provide a transcript of a video that I would like you to summarize.
+    Before you provide the summary, give a title of the summary that you provide in five or less words.
+    It is very important that the title is five or less words.
+    Make sure the title is five or less words.
+    End this title with a period, then go to a new line and begin the summary.
+    It is very important that you go to a new line before beginning the summary.
+    Do not include anything in your answer except for the title and the summary
+    Once you have given the title and summary, do not include anything else in your response.
+    Make sure the title if five or less words.
 `
 
 const defaultPrompt = `
     I am going to provide a transcript of a video that I would like you to summarize.
     Before you provide the summary, give a title of the summary that you provide in five or less words.
-    End this title with a period, write TITLE FINISHED, then go to a new line and begin the summary.
-    Do not include anything in your answer except for the title, the summary, and the item I told you to include after the title.
-    Once you have given the title and summary, do not include anything else in your response other than TITLE FINISHED.
+    It is very important that the title is five or less words.
+    Make sure the title is five or less words.
+    End this title with a period, then go to a new line and begin the summary.
+    It is very important that you go to a new line before beginning the summary.
+    Do not include anything in your answer except for the title and the summary
+    Once you have given the title and summary, do not include anything else in your response.
+    Make sure the title is five or less words.
 `
 
 async function getPrompt(options, url) {

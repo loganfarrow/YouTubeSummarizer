@@ -5,6 +5,7 @@ const errorMessages = require('../utils/error_messages')
 const axios = require('axios')
 const { OpenAI } = require('openai')
 const { getPrompt, customInstructions } = require('../utils/prompting')
+const { parseTitle } = require('../utils/helpers')
 
 exports.fetchAllFromUser = async (req, res) => {
     // returns oldest first by default, returns most recent first if the url param mostRecent === 'true'
@@ -152,6 +153,7 @@ exports.generateSummary = async (req, res) => {
         const response = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [systemMessage, userMessage],
+            temperature: 0.32 // we use a lower value to get a more deterministic & predictable (less random) output
         });
         summary = response.choices[0].message.content
     } catch (e) {
@@ -162,8 +164,8 @@ exports.generateSummary = async (req, res) => {
         return res.status(401).json({ error: 'summary returned from openai api was empty' })
     }
 
-    // TODO the title should be the video's title
-    const title = 'title placeholder'
+    // get the sumary's title from the summary text
+    const title = parseTitle(summary)
 
     // create summary object with the response and save it to the database
     let savedSummary = null
