@@ -8,8 +8,8 @@ function parseTitle(summaryText) {
 
     const titleEndIndex = Math.min(firstNewlineIndex, firstPeriodIndex, nthWordIndex)
 
-    console.log(firstNewlineIndex, firstPeriodIndex, nthWordIndex)
-    console.log('titleEndIndex: ' + titleEndIndex)
+    // console.log(firstNewlineIndex, firstPeriodIndex, nthWordIndex)
+    // console.log('titleEndIndex: ' + titleEndIndex)
 
     const title = summaryText.slice(0, titleEndIndex + 1)
 
