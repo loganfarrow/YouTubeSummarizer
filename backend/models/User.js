@@ -151,3 +151,4 @@ userSchema.methods.updateEmail = async function (newEmail) {
 let userModel = mongoose.model('User', userSchema)
 
 module.exports = userModel
+
