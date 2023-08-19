@@ -1,4 +1,5 @@
 const axios = require('axios')
+const { get_auth_header } = require('./misc.js')
 
 const BACKEND_URL_BASE = "https://localhost:4000/authentication"
 
@@ -60,8 +61,4 @@ export const deleteUser = async (jwt) => {
     auth_header = {'Authorization': `${jwt}`}
     const response = await axios.delete(`${BACKEND_URL_BASE}/deleteUser`, { headers: get_auth_header(jwt) })
     return { data: response.data, status: response.status }
-}
-
-function get_auth_header(jwt) {
-    return {'Authorization': `${jwt}`}
 }
