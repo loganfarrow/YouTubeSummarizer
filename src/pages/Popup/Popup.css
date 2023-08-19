@@ -10,6 +10,7 @@
   height: 100%;
   padding: 10px;
   background-color: #282c34;
+
 }
 
 .title {
@@ -23,11 +24,40 @@
   display: flex;
   justify-content: center;
   gap: 10px;
+  margin: 10px;
 }
 
-.textarea-container,
 .button-container {
   display: flex;
   justify-content: center;
   margin-top: 10px;
+}
+
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(40, 44, 52, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* Prevent scrolling within the container */
+}
+
+.modal-content {
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+}
+
+.textarea-container .custom-textarea {
+  resize: vertical;
+  /* Only allow vertical resizing */
+  max-height: 400px;
+  /* Set a maximum height */
 }
