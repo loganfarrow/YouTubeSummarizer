@@ -4,9 +4,8 @@ import './Popup.css';
 const Popup = () => {
   const [isFormVisible, setFormVisible] = useState(false);
 
-  const handleClick = () => {
-    // For now, we're just toggling the form on button click
-    // In a real-world application, perform some form submission logic here
+  const handleClick = (e) => {
+    e.preventDefault(); // Prevent form submission
     setFormVisible(false);
   }
 
@@ -17,43 +16,47 @@ const Popup = () => {
           <p className="title">YouTube Summarizer</p>
 
           <div className="buttons">
-            <button class="button is-primary">
+            <button className="button is-primary">
               Summary
             </button>
-            <button class="button is-primary">
+            <button className="button is-primary">
               Settings
             </button>
           </div>
 
           <div className="textarea-container">
-            <textarea class="textarea" placeholder="e.g. Hello world" readOnly></textarea>
+            <textarea className="textarea custom-textarea" placeholder="e.g. Hello world" readOnly></textarea>
           </div>
 
           <div className="button-container">
-            <button class="button is-primary" onClick={() => setFormVisible(true)}>
+            <button className="button is-primary" onClick={() => setFormVisible(true)}>
               Generate Summary
             </button>
           </div>
 
-          {isFormVisible &&
-            <form class="box popup-form">
-              <div class="field">
-                <label class="label">Email</label>
-                <div class="control">
-                  <input class="input" type="email" placeholder="e.g. alex@example.com" />
-                </div>
-              </div>
+          {isFormVisible && (
+            <div className="modal-container">
+              <div className="modal-content">
+                <form className="box popup-form">
+                  <div className="field">
+                    <label className="label">Email</label>
+                    <div className="control">
+                      <input className="input" type="email" placeholder="e.g. alex@example.com" />
+                    </div>
+                  </div>
 
-              <div class="field">
-                <label class="label">Password</label>
-                <div class="control">
-                  <input class="input" type="password" placeholder="********" />
-                </div>
-              </div>
+                  <div className="field">
+                    <label className="label">Password</label>
+                    <div className="control">
+                      <input className="input" type="password" placeholder="********" />
+                    </div>
+                  </div>
 
-              <button class="button is-primary" onClick={handleClick}>Sign in</button>
-            </form>
-          }
+                  <button className="button is-primary" onClick={handleClick}>Sign in</button>
+                </form>
+              </div>
+            </div>
+          )}
         </header>
       </div>
     </div>
