@@ -23,8 +23,7 @@
 .buttons {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin: 10px;
+  gap: 5px;
 }
 
 .button-container {
@@ -57,7 +56,6 @@
 
 .textarea-container .custom-textarea {
   resize: vertical;
-  /* Only allow vertical resizing */
   max-height: 400px;
-  /* Set a maximum height */
+
 }
