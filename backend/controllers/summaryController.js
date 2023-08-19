@@ -127,7 +127,7 @@ exports.generateSummary = async (req, res) => {
         options = await Options.createNewOptions(optionsDict)
         options.save()
     } catch (e) {
-        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + '/n' + errorMessages.ensureValidOptions })
+        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + `\n` + errorMessages.ensureValidOptions })
     }
 
     // call a helper function here that gets prompt based on user's options
@@ -165,7 +165,14 @@ exports.generateSummary = async (req, res) => {
     }
 
     // get the sumary's title from the summary text
-    const title = parseTitle(summary)
+    let title = ''
+    if (options.tone !== 'dog') {
+        // get the title from the summary (unless its in dog speak)
+        title = parseTitle(summary)
+    } else {
+        // if its in dog speak make the first five words the title
+        title = summary.split(' ').slice(0, 5).join(' ')
+    }
 
     // create summary object with the response and save it to the database
     let savedSummary = null
