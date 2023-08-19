@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 })
 
 // point to the route files (which contain the endpoints)
-app.use('/authentication', authenticationRoutes)
+app.use('/api/authentication', authenticationRoutes)
 app.use('/api/summaries', summaryRoutes)
 
 // if no routes match, return 404 and remind them to only use integer paramters for userId and summaryId

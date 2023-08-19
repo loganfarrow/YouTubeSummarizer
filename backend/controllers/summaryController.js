@@ -127,7 +127,7 @@ exports.generateSummary = async (req, res) => {
         options = await Options.createNewOptions(optionsDict)
         options.save()
     } catch (e) {
-        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + `\n` + errorMessages.ensureValidOptions })
+        return res.status(400).json({ error: 'The following error occurred while creating options dictionary: ' + e.message + ` \n ` + errorMessages.ensureValidOptions })
     }
 
     // call a helper function here that gets prompt based on user's options
