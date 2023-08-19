@@ -5,7 +5,6 @@ const Popup = () => {
   const [activeView, setActiveView] = useState('summary'); // State to manage the active view
   const [isFormVisible, setFormVisible] = useState(false);
   const [isFormVisible2, setFormVisible2] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [jwtToken, setJwtToken] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +12,12 @@ const Popup = () => {
 
 
   const handleClick = (e) => {
+    e.preventDefault();
+    setFormVisible(false);
+    setFormVisible2(false);
+  };
+
+  const handleBackClick = (e) => {
     e.preventDefault();
     setFormVisible(false);
     setFormVisible2(false);
@@ -37,7 +42,7 @@ const Popup = () => {
   };
 
   const handleGenerateSummary = () => {
-    if (!isLoggedIn) {
+    if (jwtToken == '') {
       setFormVisible(true);
     } else {
       getCurrentUrl((link) => {
@@ -125,6 +130,7 @@ const Popup = () => {
                     </div>
                   </div>
 
+                  <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
                   <button className="button is-primary" onClick={handleSignInClick} style={{ marginRight: '10px' }}>Sign in</button>
                   <button className="button is-primary" onClick={handleRegisterClick}>Register</button>
                 </form>
@@ -155,6 +161,7 @@ const Popup = () => {
                       <input className="input" type="openAIKey" placeholder="" value={openAIKey} onChange={e => setOpenAIKey(e.target.value)} />
                     </div>
                   </div>
+                  <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
 
                   <button className="button is-primary" onClick={handleClick}>Register</button>
                 </form>
