@@ -12,7 +12,6 @@ const Popup = () => {
   // if this is empty, we are not logged in
   const [jwtToken, setJwtToken] = useState('');
   console.log('jwtToken: ', jwtToken)
-
   // state for the inputs in login / register forms
   const [emailInput, setEmail] = useState('');
   const [passwordInput, setPassword] = useState('');
@@ -20,6 +19,16 @@ const Popup = () => {
 
   // holds representation of the current summary (in JSON format)
   const [currentSummary, setSummary] = useState({});
+
+  // on the first load, we want to check if there is a jwtToken in local storage and set it if so
+  React.useEffect(() => {
+    let jwt_token = localStorage.getItem('jwtToken')
+    if (jwt_token !== null) {
+      setJwtToken(jwt_token);
+    }
+
+    console.log(localStorage)
+  }, []);
 
   const handleBackClick = (e) => {
     e.preventDefault();
@@ -63,6 +72,9 @@ const Popup = () => {
 
     setJwtToken(responseData.token);
 
+    // save the token to the local storage
+    localStorage.setItem('jwtToken', responseData.token);
+
     setIsLoginFormVisible(false);
   };
 
@@ -86,12 +98,21 @@ const Popup = () => {
 
     setJwtToken(responseData.token);
 
+    // save the token to the local storage
+    localStorage.setItem('jwtToken', responseData.token);
+
     setIsLoginFormVisible(false);
     setIsRegisterFormVisible(false);
   };
 
   const handleLogout = (e) => {
     e.preventDefault();
+    // remove the token from local storage (if it exists)
+    let jwt_token = localStorage.getItem('jwtToken')
+    if (jwt_token !== null) {
+      localStorage.removeItem('jwtToken');
+    }
+    
     setJwtToken('');
   }
 
