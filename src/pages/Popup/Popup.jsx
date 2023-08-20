@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Popup.css';
+import { login, register, updateOpenAiKey, fetchUser, updatePassword, updateEmail, deleteUser } from '../../../utils/authenticationCalls'
 
 const Popup = () => {
   const [activeView, setActiveView] = useState('summary'); // Current active view (summary, settings, or past-summaries)
@@ -9,12 +10,16 @@ const Popup = () => {
   const [isRegisterFormVisible, setIsRegisterFormVisible] = useState(false);
 
   // if this is empty, we are not logged in
-  const [jwtToken, setJwtToken] = useState('test');
-  
+  const [jwtToken, setJwtToken] = useState('');
+  console.log('jwtToken: ', jwtToken)
+
   // state for the inputs in login / register forms
   const [emailInput, setEmail] = useState('');
   const [passwordInput, setPassword] = useState('');
   const [openAIKeyInput, setOpenAIKey] = useState('');
+
+  // holds representation of the current summary (in JSON format)
+  const [currentSummary, setSummary] = useState({});
 
   const handleBackClick = (e) => {
     e.preventDefault();
@@ -34,20 +39,53 @@ const Popup = () => {
     setIsLoginFormVisible(true);
   }
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
 
     console.log('Email:', emailInput);
     console.log('Password:', passwordInput);
 
-    const token = 'jwt-token'; //replace with the logic for backend JWT token generation
-    setJwtToken(token);
+    let email = emailInput;
+    let password = passwordInput;
+
+    let response = await login(email, password);
+    let responseData = response.data;
+    let responseStatus = response.status;
+
+    if (responseStatus !== 200) {
+      // TODO this should show up in the UI as some sort of error
+      // TODO reconfigure backend to return diff status codes for diff errors (e.g. 401 for bad password, 404 for no user, etc.)
+      console.log(responseData)
+
+      console.error('Error logging in: ' + responseData.e);
+      return;
+    } 
+
+    setJwtToken(responseData.token);
 
     setIsLoginFormVisible(false);
   };
 
-  const handleRegisterAccount = (e) => {
+  const handleRegisterAccount = async (e) => {
     e.preventDefault();
+
+    let email = emailInput;
+    let password = passwordInput;
+    let openAIKey = openAIKeyInput;
+
+    let response = await register(email, password, openAIKey);
+    let responseData = response.data;
+    let responseStatus = response.status;
+
+    if (responseStatus !== 200) {
+      // TODO this should show up in the UI as some sort of error 
+      // TODO reconfigure backend to return diff status codes for diff errors (e.g. 401 for bad password, 404 for no user, etc.)
+      console.error('Error registering account: ' + responseData.e);
+      return;
+    } 
+
+    setJwtToken(responseData.token);
+
     setIsLoginFormVisible(false);
     setIsRegisterFormVisible(false);
   };
@@ -93,7 +131,9 @@ const Popup = () => {
           {activeView === 'summary' && (
             <>
               <div className="textarea-container">
-                <textarea className="textarea custom-textarea" placeholder={jwtToken == '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'" } readOnly></textarea>
+                <textarea className="textarea custom-textarea" placeholder={jwtToken == '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'" } readOnly>
+                  { isEmpty(currentSummary) ? '' : currentSummary.summary }
+                </textarea>
               </div>
               <div className="bottom-button-container">
                 {jwtToken === '' ? (
@@ -183,6 +223,9 @@ const Popup = () => {
     </div>
   );
 };
+
+// Helper function to check if an object is empty
+const isEmpty = (obj) => Object.keys(obj).length === 0;
 
 export default Popup;
 
