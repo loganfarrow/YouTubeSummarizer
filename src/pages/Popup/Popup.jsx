@@ -3,47 +3,52 @@ import './Popup.css';
 
 const Popup = () => {
   const [activeView, setActiveView] = useState('summary'); // State to manage the active view
-  const [isFormVisible, setFormVisible] = useState(false);
-  const [isFormVisible2, setFormVisible2] = useState(false);
+
+  // handles the visibility of the login and register form popups
+  const [isLoginFormVisible, setIsLoginFormVisible] = useState(false);
+  const [isRegisterFormVisible, setIsRegisterFormVisible] = useState(false);
+
+  // if this is empty, we are not logged in
   const [jwtToken, setJwtToken] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [openAIKey, setOpenAIKey] = useState('');
 
-
-  const handleClick = (e) => {
-    e.preventDefault();
-    setFormVisible(false);
-    setFormVisible2(false);
-  };
+  // state for the inputs in login / register forms
+  const [emailInput, setEmail] = useState('');
+  const [passwordInput, setPassword] = useState('');
+  const [openAIKeyInput, setOpenAIKey] = useState('');
 
   const handleBackClick = (e) => {
     e.preventDefault();
-    setFormVisible(false);
-    setFormVisible2(false);
+    setIsLoginFormVisible(false);
+    setIsRegisterFormVisible(false);
   };
 
-  const handleRegisterClick = (e) => {
+  const handleGoToRegisterFormClick = (e) => {
     e.preventDefault();
-    setFormVisible(false);
-    setFormVisible2(true);
+    setIsLoginFormVisible(false);
+    setIsRegisterFormVisible(true);
   };
 
   const handleSignInClick = (e) => {
     e.preventDefault();
 
-    console.log('Email:', email);
-    console.log('Password:', password);
+    console.log('Email:', emailInput);
+    console.log('Password:', passwordInput);
 
     const token = 'jwt-token'; //replace with the logic for backend JWT token generation
     setJwtToken(token);
 
-    setFormVisible(false);
+    setIsLoginFormVisible(false);
+  };
+
+  const handleRegisterAccountClick = (e) => {
+    e.preventDefault();
+    setIsLoginFormVisible(false);
+    setIsRegisterFormVisible(false);
   };
 
   const handleGenerateSummary = () => {
     if (jwtToken == '') {
-      setFormVisible(true);
+      setIsLoginFormVisible(true);
     } else {
       getCurrentUrl((link) => {
         // Make a call to your backend endpoint with the link
@@ -64,19 +69,17 @@ const Popup = () => {
     }
   };
 
-  const getCurrentUrl = (callback) => {
+  // TODO add a check that this is a Youtube video url
+  const getCurrentUrl = () => {
     if (chrome && chrome.tabs) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const url = tabs[0].url;
-        callback(url);
+        return url;
       });
     } else {
       console.error('This function only works in a Chrome extension.');
     }
   };
-
-
-
 
   return (
     <div className="App">
@@ -112,58 +115,58 @@ const Popup = () => {
               <p>Past Summaries Content</p>
             </div>
           )}
-          {isFormVisible && (
+          {isLoginFormVisible && (
             <div className="modal-container">
               <div className="modal-content">
                 <form className="box popup-form">
                   <div className="field">
                     <label className="label">Email</label>
                     <div className="control">
-                      <input className="input" type="email" placeholder="e.g. alex@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                      <input className="input" type="email" placeholder="e.g. alex@example.com" value={emailInput} onChange={e => setEmail(e.target.value)} />
                     </div>
                   </div>
 
                   <div className="field">
                     <label className="label">Password</label>
                     <div className="control">
-                      <input className="input" type="password" placeholder="********" value={password} onChange={e => setPassword(e.target.value)} />
+                      <input className="input" type="password" placeholder="********" value={passwordInput} onChange={e => setPassword(e.target.value)} />
                     </div>
                   </div>
 
                   <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
                   <button className="button is-primary" onClick={handleSignInClick} style={{ marginRight: '10px' }}>Sign in</button>
-                  <button className="button is-primary" onClick={handleRegisterClick}>Register</button>
+                  <button className="button is-primary" onClick={handleGoToRegisterFormClick}>Register</button>
                 </form>
               </div>
             </div>
           )}
-          {isFormVisible2 && (
+          {isRegisterFormVisible && (
             <div className="modal-container">
               <div className="modal-content">
                 <form className="box popup-form">
                   <div className="field">
                     <label className="label">Email</label>
                     <div className="control">
-                      <input className="input" type="email" placeholder="e.g. alex@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                      <input className="input" type="email" placeholder="e.g. alex@example.com" value={emailInput} onChange={e => setEmail(e.target.value)} />
                     </div>
                   </div>
 
                   <div className="field">
                     <label className="label">Password</label>
                     <div className="control">
-                      <input className="input" type="password" placeholder="********" value={password} onChange={e => setPassword(e.target.value)} />
+                      <input className="input" type="password" placeholder="********" value={passwordInput} onChange={e => setPassword(e.target.value)} />
                     </div>
                   </div>
 
                   <div className="field">
                     <label className="label">OpenAI Key</label>
                     <div className="control">
-                      <input className="input" type="openAIKey" placeholder="" value={openAIKey} onChange={e => setOpenAIKey(e.target.value)} />
+                      <input className="input" type="openAIKey" placeholder="" value={openAIKeyInput} onChange={e => setOpenAIKey(e.target.value)} />
                     </div>
                   </div>
                   <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
 
-                  <button className="button is-primary" onClick={handleClick}>Register</button>
+                  <button className="button is-primary" onClick={handleRegisterAccountClick}>Register</button>
                 </form>
               </div>
             </div>
