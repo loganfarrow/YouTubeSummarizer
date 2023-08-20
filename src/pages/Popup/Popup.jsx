@@ -211,7 +211,7 @@ const Popup = () => {
 
                   {showLoginError && (
                     <>
-                      <p className="error-message">Error logging in. Please try again.</p>
+                      <p className="login-error-message">Error logging in. Please try again.</p>
                     </>
                   )}
 
@@ -247,6 +247,12 @@ const Popup = () => {
                     </div>
                   </div>
                   <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
+
+                  {showRegisterError && (
+                    <>
+                      <p className="register-error-message">Error registering account. Please try again.</p>
+                    </>
+                  )}
 
                   <button className="button is-primary" onClick={handleRegisterAccount}>Register</button>
                 </form>
