@@ -20,6 +20,10 @@ const Popup = () => {
   // holds representation of the current summary (in JSON format)
   const [currentSummary, setSummary] = useState({});
 
+  // show error messages if login or register failed
+  const [showLoginError , setShowLoginError] = useState(false);
+  const [showRegisterError, setShowRegisterError] = useState(false);
+
   // on the first load, we want to check if there is a jwtToken in local storage and set it if so
   React.useEffect(() => {
     let jwt_token = localStorage.getItem('jwtToken')
@@ -64,12 +68,14 @@ const Popup = () => {
     if (responseStatus !== 200) {
       // TODO this should show up in the UI as some sort of error
       // TODO reconfigure backend to return diff status codes for diff errors (e.g. 401 for bad password, 404 for no user, etc.)
-      console.log(responseData)
-
       console.error('Error logging in: ' + responseData.e);
+      setShowLoginError(true);
       return;
     } 
 
+    // if we've successfully logged in we definitely don't want to show the login error anymore
+    setShowLoginError(false);
+    
     setJwtToken(responseData.token);
 
     // save the token to the local storage
@@ -93,9 +99,11 @@ const Popup = () => {
       // TODO this should show up in the UI as some sort of error 
       // TODO reconfigure backend to return diff status codes for diff errors (e.g. 401 for bad password, 404 for no user, etc.)
       console.error('Error registering account: ' + responseData.e);
+      setShowRegisterError(true);
       return;
     } 
 
+    setShowRegisterError(false);
     setJwtToken(responseData.token);
 
     // save the token to the local storage
@@ -200,6 +208,12 @@ const Popup = () => {
                       <input className="input" type="password" placeholder="********" value={passwordInput} onChange={e => setPassword(e.target.value)} />
                     </div>
                   </div>
+
+                  {showLoginError && (
+                    <>
+                      <p className="error-message">Error logging in. Please try again.</p>
+                    </>
+                  )}
 
                   <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
                   <button className="button is-primary" onClick={handleSignIn} style={{ marginRight: '10px' }}>Sign in</button>
