@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import './Popup.css';
 
 const Popup = () => {
-  const [activeView, setActiveView] = useState('summary'); // State to manage the active view
+  const [activeView, setActiveView] = useState('summary'); // Current active view (summary, settings, or past-summaries)
 
   // handles the visibility of the login and register form popups
   const [isLoginFormVisible, setIsLoginFormVisible] = useState(false);
   const [isRegisterFormVisible, setIsRegisterFormVisible] = useState(false);
 
   // if this is empty, we are not logged in
-  const [jwtToken, setJwtToken] = useState('');
-
+  const [jwtToken, setJwtToken] = useState('test');
+  
   // state for the inputs in login / register forms
   const [emailInput, setEmail] = useState('');
   const [passwordInput, setPassword] = useState('');
@@ -28,7 +28,13 @@ const Popup = () => {
     setIsRegisterFormVisible(true);
   };
 
-  const handleSignInClick = (e) => {
+  const handleGoToLoginFormClick = (e) => { 
+    e.preventDefault();
+    setIsRegisterFormVisible(false);
+    setIsLoginFormVisible(true);
+  }
+
+  const handleSignIn = (e) => {
     e.preventDefault();
 
     console.log('Email:', emailInput);
@@ -40,33 +46,19 @@ const Popup = () => {
     setIsLoginFormVisible(false);
   };
 
-  const handleRegisterAccountClick = (e) => {
+  const handleRegisterAccount = (e) => {
     e.preventDefault();
     setIsLoginFormVisible(false);
     setIsRegisterFormVisible(false);
   };
 
-  const handleGenerateSummary = () => {
-    if (jwtToken == '') {
-      setIsLoginFormVisible(true);
-    } else {
-      getCurrentUrl((link) => {
-        // Make a call to your backend endpoint with the link
-        fetch(`/your-api-endpoint?link=${link}`, {
-          method: 'GET',
-          headers: {
-            // Include any necessary headers
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            // Handle the response data
-          })
-          .catch((error) => {
-            // Handle any errors
-          });
-      });
-    }
+  const handleLogout = (e) => {
+    e.preventDefault();
+    setJwtToken('');
+  }
+
+  const handleGenerateSummary = (e) => {
+    e.preventDefault();
   };
 
   // TODO add a check that this is a Youtube video url
@@ -87,19 +79,35 @@ const Popup = () => {
         <header className="App-header">
           <p className="title">YouTube Summarizer</p>
           <div className="buttons">
-            <button className="button is-primary" onClick={() => setActiveView('summary')}>Summary</button>
-            <button className="button is-primary" onClick={() => setActiveView('past-summaries')}>Past Summaries</button>
-            <button className="button is-primary" onClick={() => setActiveView('settings')}>Settings</button>
+            {jwtToken === '' ? (
+              <>
+                <button className="button is-primary" onClick={() => setActiveView('summary')}>Summary</button>
+              </>
+            ) : (
+              <>
+                <button className="button is-primary" onClick={() => setActiveView('summary')}>Summary</button>
+                <button className="button is-primary" onClick={() => setActiveView('settings')}>Settings</button>
+                <button className="button is-primary" onClick={handleLogout}>Logout</button>
+              </>
+            )}
           </div>
           {activeView === 'summary' && (
             <>
               <div className="textarea-container">
-                <textarea className="textarea custom-textarea" placeholder="e.g. Hello world" readOnly></textarea>
+                <textarea className="textarea custom-textarea" placeholder="Naviage to a YouTube video and click 'Generate Summary'" readOnly></textarea>
               </div>
-              <div className="button-container">
-                <button className="button is-primary" onClick={handleGenerateSummary}>
-                  Generate Summary
-                </button>
+              <div className="bottom-button-container">
+                {jwtToken === '' ? (
+                  <>
+                    <button className="button is-primary" onClick={handleGoToLoginFormClick}>Log In</button>
+                    <button className="button is-primary" onClick={handleGoToRegisterFormClick}>Register</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="button is-primary" onClick={handleGenerateSummary}>Generate Summary</button>
+                    <button className="button is-primary" onClick={() => setActiveView('past-summaries')}>Past Summaries</button>
+                  </>
+                )}
               </div>
             </>
           )}
@@ -134,7 +142,7 @@ const Popup = () => {
                   </div>
 
                   <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
-                  <button className="button is-primary" onClick={handleSignInClick} style={{ marginRight: '10px' }}>Sign in</button>
+                  <button className="button is-primary" onClick={handleSignIn} style={{ marginRight: '10px' }}>Sign in</button>
                   <button className="button is-primary" onClick={handleGoToRegisterFormClick}>Register</button>
                 </form>
               </div>
@@ -166,7 +174,7 @@ const Popup = () => {
                   </div>
                   <button className="button is-primary" onClick={handleBackClick} style={{ marginRight: '10px' }}>Back</button>
 
-                  <button className="button is-primary" onClick={handleRegisterAccountClick}>Register</button>
+                  <button className="button is-primary" onClick={handleRegisterAccount}>Register</button>
                 </form>
               </div>
             </div>

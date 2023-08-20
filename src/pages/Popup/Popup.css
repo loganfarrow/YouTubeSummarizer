@@ -26,10 +26,11 @@
   gap: 5px;
 }
 
-.button-container {
+.bottom-button-container {
   display: flex;
   justify-content: center;
   margin-top: 10px;
+  gap: 5px;
 }
 
 .modal-container {
