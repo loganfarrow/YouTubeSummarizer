@@ -81,7 +81,6 @@ const Popup = () => {
           <div className="buttons">
             {jwtToken === '' ? (
               <>
-                <button className="button is-primary" onClick={() => setActiveView('summary')}>Summary</button>
               </>
             ) : (
               <>
@@ -94,7 +93,7 @@ const Popup = () => {
           {activeView === 'summary' && (
             <>
               <div className="textarea-container">
-                <textarea className="textarea custom-textarea" placeholder="Naviage to a YouTube video and click 'Generate Summary'" readOnly></textarea>
+                <textarea className="textarea custom-textarea" placeholder={jwtToken == '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'" } readOnly></textarea>
               </div>
               <div className="bottom-button-container">
                 {jwtToken === '' ? (
