@@ -1,7 +1,7 @@
 const axios = require('axios')
 const { get_auth_header } = require('./misc.js')
 
-const BACKEND_URL_BASE = "https://localhost:4000/authentication"
+const BACKEND_URL_BASE = "http://localhost:4000/api/authentication"
 
 // returns { email, jwt_token}
 export const login = async (email, password) => {

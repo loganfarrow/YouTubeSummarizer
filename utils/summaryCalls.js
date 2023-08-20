@@ -1,7 +1,7 @@
 const axios = require('axios')
 const { get_auth_header } = require('./misc.js')
 
-const BACKEND_URL_BASE = "https://localhost:4000/api/summaries"
+const BACKEND_URL_BASE = "http://localhost:4000/api/summaries"
 
 // returns a success or error message, also returns created summary object (if successful)
 export const generateSummary = async (video_url, options) => {
