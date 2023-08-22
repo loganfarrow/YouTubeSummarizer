@@ -276,7 +276,6 @@ const Popup = () => {
                 ) : (
                   <>
                     <button className="button is-primary" onClick={handleGenerateSummary}>Generate Summary</button>
-                    <button className="button is-primary" onClick={() => setActiveView('past-summaries')}>Past Summaries</button>
                   </>
                 )}
               </div>
