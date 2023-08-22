@@ -22,7 +22,7 @@ const Popup = () => {
   const [summaryTone, setSummaryTone] = useState('standard');
   const [summaryToneAge, setSummaryToneAge] = useState('unspecified');
   const [bulletPoints, setBulletPoints] = useState('false');
-  const [bulletPointLimit, setBulletPointLimit] = useState(1);
+  const [bulletPointLimit, setBulletPointLimit] = useState(10);
 
   // holds representation of the current summary (in JSON format)
   const [currentSummary, setSummary] = useState({});
@@ -31,6 +31,9 @@ const Popup = () => {
   const [showLoginError, setShowLoginError] = useState(false);
   const [showRegisterError, setShowRegisterError] = useState(false);
   const [showGenerateSummaryError, setShowGenerateSummaryError] = useState(false);
+
+  // check if generating summary is in progress
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
   // on the first load, we want to check if there is a jwtToken in local storage and set it if so
   React.useEffect(() => {
@@ -141,8 +144,22 @@ const Popup = () => {
     setJwtToken('');
   }
 
+  const parseOptions = () => {
+    let bulletPts = bulletPoints === 'true' ? true : false;
+
+    return {
+      length: summaryLength,
+      tone: summaryTone,
+      targetAge: summaryToneAge,
+      bulletPoints: bulletPts,
+      bulletPointLimit: parseInt(bulletPointLimit)
+    }
+  }
+
   const handleGenerateSummary = async (e) => {
     e.preventDefault();
+    setIsGeneratingSummary(true);
+    setSummary('');  // clear the current summary
 
     let url = ''
     try {
@@ -156,12 +173,13 @@ const Popup = () => {
     // check that the url is a youtube url (TODO is there a better / more comprehensive way to check this?)
     if (!url.includes('youtube.com')) {
       console.error('Error generating summary: not a youtube url');
+      setIsGeneratingSummary(false);
       setShowGenerateSummaryError(true);
       return;
     }
 
     // TODO get the options from the settings page
-    const options = {};  // note make sure options is passed in as a JSON object
+    const options = parseOptions();  // note make sure options is passed in as a JSON object
 
     let response = await generateSummary(url, options, jwtToken);
     let responseData = response.data;
@@ -171,12 +189,15 @@ const Popup = () => {
       // TODO this should show up in the UI as some sort of error 
       // TODO reconfigure backend to return diff status codes for diff errors (e.g. 401 for bad password, 404 for no user, etc.)
       console.error('Error generating summary: ' + responseData);
+      setIsGeneratingSummary(false);
       setShowGenerateSummaryError(true);
       return;
     }
 
+    setIsGeneratingSummary(false);
     setSummary(responseData.summary);
     setShowGenerateSummaryError(false);
+    console.log('generated Summary successfully')
   };
 
   // TODO add a check that this is a Youtube video url
@@ -215,11 +236,28 @@ const Popup = () => {
           {activeView === 'summary' && (
             <>
               <div className="textarea-container">
-                <textarea className="textarea custom-textarea"
-                  placeholder={jwtToken === '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'"}
-                  readOnly
-                  value={isEmpty(currentSummary) ? '' : currentSummary.summary}>
-                </textarea>
+                {!isGeneratingSummary ? (
+                  <>
+                    <div className="control">
+                      <textarea className="textarea custom-textarea"
+                        placeholder={jwtToken === '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'"}
+                        readOnly
+                        value={isEmpty(currentSummary) ? '' : currentSummary.summary}>
+                      </textarea>
+                    </div>
+                  </> 
+                ) : (
+                  <>
+                    <div className="control is-loading">
+                      <textarea className="textarea custom-textarea"
+                        placeholder="Generating..."
+                        readOnly
+                        value={isEmpty(currentSummary) ? '' : currentSummary.summary}>
+                      </textarea>
+                    </div>
+                  </>
+                  
+                )}
               </div>
               {showGenerateSummaryError && (
                 <>
@@ -244,119 +282,124 @@ const Popup = () => {
             </>
           )}
           {activeView === 'settings' && (
-      <div>
-        <div className="columns control">
-          {/* Summary Length */}
-          <div className="columns">
-            <div className="column is-narrow">
-              <h4 className="title is-5">Summary Length</h4>
-            </div>
-            <div className="column">
-              <div className="field">
-                <p className="control has-icons-left">
-                  <span className="select">
-                  <select name="length" value={summaryLength} onChange={(e) => setSummaryLength(e.target.value)}>
-                      <option value="tiny">Tiny</option>
-                      <option value="short">Short</option>
-                      <option value="medium" selected>Medium</option>
-                      <option value="long">Long</option>
-                      <option value="xlong">Extra Long</option>
-                    </select>
-                  </span>
-                  <span className="icon is-small is-left">
-                    <i className="fas fa-ruler"></i>
-                  </span>
-                </p>
+            <div>
+              <div className="columns control">
+                {/* Summary Length */}
+                <div className="columns">
+                  <div className="column is-narrow">
+                    <h4 className="title is-5">Summary Length</h4>
+                  </div>
+                  <div className="column">
+                    <div className="field">
+                      <p className="control has-icons-left">
+                        <span className="select">
+                          <select name="length" value={summaryLength} onChange={(e) => setSummaryLength(e.target.value)}>
+                            <option value="tiny">Tiny</option>
+                            <option value="short">Short</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="long">Long</option>
+                            <option value="xlong">Extra Long</option>
+                          </select>
+                        </span>
+                        <span className="icon is-small is-left">
+                          <i className="fas fa-ruler"></i>
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary Tone */}
+                <div className="columns">
+                  <div className="column is-narrow">
+                    <h4 className="title is-5">Summary Tone</h4>
+                  </div>
+                  <div className="column">
+                    <div className="field">
+                      <p className="control has-icons-left">
+                        <span className="select">
+                          <select name="tone" value={summaryTone} onChange={(e) => setSummaryTone(e.target.value)}>
+                            <option value="standard" selected>Standard</option>
+                            <option value="professional">Professional</option>
+                            <option value="academic">Academic</option>
+                            <option value="casual">Casual</option>
+                            <option value="einstein">Einstein</option>
+                            <option value="redneck">Redneck</option>
+                            <option value="dog">Dog</option>
+                          </select>
+                        </span>
+                        <span className="icon is-small is-left">
+                          <i className="fas fa-voice"></i>
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary Tone Age */}
+                <div className="columns">
+                  <div className="column is-narrow">
+                    <h4 className="title is-5">Summary Tone Age</h4>
+                  </div>
+                  <div className="column">
+                    <div className="field">
+                      <p className="control has-icons-left">
+                        <span className="select">
+                          <select name="targetAge" value={summaryToneAge} onChange={(e) => setSummaryToneAge(e.target.value)}>
+                            <option value="unspecified" selected>Unspecified</option>
+                            <option value="five year old">Five Year Old</option>
+                            <option value="teenager">Teenager</option>
+                            <option value="college student">College Student</option>
+                            <option value="adult">Adult</option>
+                          </select>
+                        </span>
+                        <span className="icon is-small is-left">
+                          <i className="fas fa-child"></i>
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bullet Points */}
+                <div className="columns">
+                  <div className="column is-narrow">
+                    <h4 className="title is-5">Bullet Points</h4>
+                  </div>
+                  <div className="column">
+                    <div className="field">
+                      <p className="control has-icons-left">
+                        <span className="select">
+                          <select name="bulletPoints" value={bulletPoints} onChange={(e) => setBulletPoints(e.target.value)}>
+                            <option value="true">True</option>
+                            <option value="false" selected>False</option>
+                          </select>
+                        </span>
+                        <span className="icon is-small is-left">
+                          <i className="fas fa-list-ul"></i>
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bullet Point Limit */}
+                {bulletPoints === 'true' && (
+                  <>
+                    <div className="columns">
+                      <div className="column is-narrow">
+                        <h4 className="title is-5">Max Number of Bullet Points</h4>
+                      </div>
+                      <div className="column">
+                        <input type="number" name="bulletPointLimit" min="1" max="15" value={bulletPointLimit} onChange={(e) => setBulletPointLimit(e.target.value)} />
+                      </div>
+                    </div>
+                  </>
+                )}
+
               </div>
             </div>
-          </div>
-
-          {/* Summary Tone */}
-          <div className="columns">
-            <div className="column is-narrow">
-              <h4 className="title is-5">Summary Tone</h4>
-            </div>
-            <div className="column">
-              <div className="field">
-                <p className="control has-icons-left">
-                  <span className="select">
-                  <select name="tone" value={summaryTone} onChange={(e) => setSummaryTone(e.target.value)}>
-                      <option value="standard" selected>Standard</option>
-                      <option value="professional">Professional</option>
-                      <option value="academic">Academic</option>
-                      <option value="casual">Casual</option>
-                      <option value="einstein">Einstein</option>
-                      <option value="redneck">Redneck</option>
-                      <option value="dog">Dog</option>
-                    </select>
-                  </span>
-                  <span className="icon is-small is-left">
-                    <i className="fas fa-voice"></i>
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Summary Tone Age */}
-          <div className="columns">
-            <div className="column is-narrow">
-              <h4 className="title is-5">Summary Tone Age</h4>
-            </div>
-            <div className="column">
-              <div className="field">
-                <p className="control has-icons-left">
-                  <span className="select">
-                  <select name="targetAge" value={summaryToneAge} onChange={(e) => setSummaryToneAge(e.target.value)}>
-                      <option value="unspecified" selected>Unspecified</option>
-                      <option value="five year old">Five Year Old</option>
-                      <option value="teenager">Teenager</option>
-                      <option value="college student">College Student</option>
-                      <option value="adult">Adult</option>
-                    </select>
-                  </span>
-                  <span className="icon is-small is-left">
-                    <i className="fas fa-child"></i>
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bullet Points */}
-          <div className="columns">
-            <div className="column is-narrow">
-              <h4 className="title is-5">Bullet Points</h4>
-            </div>
-            <div className="column">
-              <div className="field">
-                <p className="control has-icons-left">
-                  <span className="select">
-                  <select name="bulletPoints" value={bulletPoints} onChange={(e) => setBulletPoints(e.target.value)}>
-                      <option value="true">True</option>
-                      <option value="false" selected>False</option>
-                    </select>
-                  </span>
-                  <span className="icon is-small is-left">
-                    <i className="fas fa-list-ul"></i>
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bullet Point Limit */}
-          <div className="columns">
-            <div className="column is-narrow">
-            <h4 className="title is-5">Max Number of Bullet Points</h4>
-            </div>
-            <div className="column">
-            <input type="number" name="bulletPointLimit" min="1" max="15" value={bulletPointLimit} onChange={(e) => setBulletPointLimit(e.target.value)} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
+          )}
           {activeView === 'past-summaries' && (
             <div>
               {/* Your past summaries components */}
