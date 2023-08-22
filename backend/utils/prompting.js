@@ -53,26 +53,14 @@ const defaultPrompt = `
     Make sure the title is five or less words.
 `
 
-async function getPrompt(options, url) {
+function getPromptHelper(options, transcript) {
     let prompt = defaultPrompt
 
-    // get transcript
-    let transcript = ''
-    if (url.includes('youtube.com')) {
-        try {
-            transcript = await getYoutubeTranscript(url)
-        } catch (e) {
-            throw new Error('the following error occurred while getting youtube video transcript: ' + e.message)
-        }
-    } else {
-        throw new Error('invalid video url provided - must be from youtube')
-    }
-
     // turn options object into a json object
-    optionsJSON = options.toJSON()
+    let optionsJSON = options.toJSON()
 
     // adding requirements to the prompt based on options selected by user
-    prompt = prompt + '\n I am now going to specify rules regarding the formatting of your response: \n' 
+    prompt = prompt + '\n I am now going to specify rules regarding the formatting of your response: \n'
 
     if (optionsJSON.hasOwnProperty('length')) {
         prompt = prompt + '\n ' + promptRules["length"][optionsJSON["length"]]
@@ -87,18 +75,18 @@ async function getPrompt(options, url) {
         prompt = prompt + '\n ' + promptRules["bulletPoints"]
     }
     if (optionsJSON.hasOwnProperty('bulletPointLimit')) {
-        prompt =  prompt + `\n` + 'The summary should have at most ' + optionsJSON["bulletPointLimit"] + ' bullet points. Do not attempt to get around this rule by making overly long, unconcise bullet points'
+        prompt = prompt + `\n` + 'The summary should have at most ' + optionsJSON["bulletPointLimit"] + ' bullet points. Do not attempt to get around this rule by making overly long, unconcise bullet points'
     }
     if (optionsJSON.hasOwnProperty('paragraphLimit')) {
-        prompt =  prompt + `\n` + 'The summary should have at most ' + optionsJSON["paragraphLimit"] + ' paragraphs'
+        prompt = prompt + `\n` + 'The summary should have at most ' + optionsJSON["paragraphLimit"] + ' paragraphs'
     }
     if (optionsJSON.hasOwnProperty('wordLimit')) {
-        prompt =  prompt + `\n` + 'The summary should have at most ' + optionsJSON["wordLimit"] + ' words. This is not a hard limit, but avoid going more than ten or so words over the limit.'
+        prompt = prompt + `\n` + 'The summary should have at most ' + optionsJSON["wordLimit"] + ' words. This is not a hard limit, but avoid going more than ten or so words over the limit.'
     }
 
 
     prompt = prompt + '\n\n here is the transcript of the video you are to summarize: \n' + transcript + '\n'
-    
+
     // console.log('TRANSCRIPT returned from python')
     // console.log(transcript)
     // console.log('PROMPT returned by getPrompt')
@@ -112,24 +100,50 @@ async function getPrompt(options, url) {
     return prompt
 }
 
+async function getPrompt(options, url) {
+    // get transcript
+    let transcript = ''
+    if (url.includes('youtube.com')) {
+        try {
+            transcript = await getYoutubeTranscript(url)
+        } catch (e) {
+            console.log('getPrompt debug1')
+            throw new Error('the following error occurred while getting youtube video transcript: ' + e.message)
+        }
+    } else {
+        console.log('getPrompt debug2')
+        throw new Error('invalid video url provided - must be from youtube')
+    }
+
+    return new Promise((resolve, reject) => {
+        try {
+            let prompt = getPromptHelper(options, transcript)
+            resolve(prompt)
+        } catch (e) {
+            console.log('getPrompt debug3')
+            reject(e)
+        }
+    })
+}
+
 function getYoutubeTranscript(url) {
     let isResolved = false
 
     return new Promise((resolve, reject) => {
         const pythonProcess = spawn('python', ['utils/get_transcript.py', url]);
-        transcript = ''
+        let transcript = ''
         // if (non-error) output is printed to the console, that means the transcript has been printed
         pythonProcess.stdout.on('data', (data) => {
             // console.log('data returned from python script: ' + data)
             transcript += data.toString()
         });
-    
+
         // this handles if any exception is thrown from the python code
         pythonProcess.stderr.on('data', (data) => {
             // console.log('error returned from python script: ' + data)
             reject(new Error(`${data.toString()}`))
         });
-    
+
         // if the output stream closes, we're done generating the transcript and can return
         pythonProcess.stdout.on('end', () => {
             isResolved = true
@@ -145,7 +159,7 @@ function getYoutubeTranscript(url) {
             }
         }, 25000); // 25 seconds
     })
-    
+
 }
 
 module.exports = {
