@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Popup.css';
 import { login, register, updateOpenAiKey, fetchUser, updatePassword, updateEmail, deleteUser } from '../../../utils/authenticationCalls'
+import { generateSummary, deleteSummary, fetchSummaries, fetchSummary, findSummary } from '../../../utils/summaryCalls'
 
 const Popup = () => {
   const [activeView, setActiveView] = useState('settings'); // Current active view (summary, settings, or past-summaries)
@@ -29,6 +30,7 @@ const Popup = () => {
   // show error messages if login or register failed
   const [showLoginError, setShowLoginError] = useState(false);
   const [showRegisterError, setShowRegisterError] = useState(false);
+  const [showGenerateSummaryError, setShowGenerateSummaryError] = useState(false);
 
   // on the first load, we want to check if there is a jwtToken in local storage and set it if so
   React.useEffect(() => {
@@ -39,6 +41,15 @@ const Popup = () => {
 
     console.log(localStorage)
   }, []);
+
+  console.log('showGenerateSummaryError: ', showGenerateSummaryError)
+
+  // if we change the view, delete any error messages that were showing
+  React.useEffect(() => {
+    setShowLoginError(false);
+    setShowRegisterError(false);
+    setShowGenerateSummaryError(false);
+  }, [activeView]);
 
   const handleBackClick = (e) => {
     e.preventDefault();
@@ -130,20 +141,58 @@ const Popup = () => {
     setJwtToken('');
   }
 
-  const handleGenerateSummary = (e) => {
+  const handleGenerateSummary = async (e) => {
     e.preventDefault();
+
+    let url = ''
+    try {
+      url = await getCurrentUrl();
+    } catch (err) {
+      console.error('Error getting current url: ' + err);
+      setShowGenerateSummaryError(true);
+      return;
+    }
+
+    // check that the url is a youtube url (TODO is there a better / more comprehensive way to check this?)
+    if (!url.includes('youtube.com')) {
+      console.error('Error generating summary: not a youtube url');
+      setShowGenerateSummaryError(true);
+      return;
+    }
+
+    // TODO get the options from the settings page
+    const options = {};  // note make sure options is passed in as a JSON object
+
+    let response = await generateSummary(url, options, jwtToken);
+    let responseData = response.data;
+    let responseStatus = response.status;
+
+    if (responseStatus !== 200) {
+      // TODO this should show up in the UI as some sort of error 
+      // TODO reconfigure backend to return diff status codes for diff errors (e.g. 401 for bad password, 404 for no user, etc.)
+      console.error('Error generating summary: ' + responseData);
+      setShowGenerateSummaryError(true);
+      return;
+    }
+
+    setSummary(responseData.summary);
+    setShowGenerateSummaryError(false);
   };
 
   // TODO add a check that this is a Youtube video url
-  const getCurrentUrl = () => {
-    if (chrome && chrome.tabs) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const url = tabs[0].url;
-        return url;
-      });
-    } else {
-      console.error('This function only works in a Chrome extension.');
-    }
+  const getCurrentUrl = async () => {
+    return new Promise((resolve, reject) => {
+      if (chrome && chrome.tabs) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          const url = tabs[0].url;
+          console.log('tabs: ', tabs)
+          console.log('url: ', url)
+          resolve(url);
+        });
+      } else {
+        reject(new Error('getCurrentUrl function called outside of Chrome extension context'));
+      }
+    })
   };
 
   return (
@@ -166,10 +215,19 @@ const Popup = () => {
           {activeView === 'summary' && (
             <>
               <div className="textarea-container">
-                <textarea className="textarea custom-textarea" placeholder={jwtToken == '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'"} readOnly>
-                  {isEmpty(currentSummary) ? '' : currentSummary.summary}
+                <textarea className="textarea custom-textarea"
+                  placeholder={jwtToken === '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'"}
+                  readOnly
+                  value={isEmpty(currentSummary) ? '' : currentSummary.summary}>
                 </textarea>
               </div>
+              {showGenerateSummaryError && (
+                <>
+                  <div className='generateSummaryError'>
+                    <p className="generate-summary-error-message">Error generating summary. Please try again.</p>
+                  </div>
+                </>
+              )}
               <div className="bottom-button-container">
                 {jwtToken === '' ? (
                   <>
