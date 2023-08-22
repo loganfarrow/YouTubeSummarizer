@@ -24,7 +24,7 @@ const routesNeedingAuth = [
 
 router.use(routesNeedingAuth, requireAuth)
 
-// fetch all summaries from user (in chronological order with option to reverse order)
+// fetch 7 summaries from user (in chronological order with option to reverse order)
 router.get('/fetchSummaries', summaryController.fetchAllFromUser)
 
 // fetch specific summary from user

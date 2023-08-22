@@ -19,9 +19,9 @@ exports.fetchAllFromUser = async (req, res) => {
 
     let summaries = []
     try {
-        summaries = (mostRecent === 'true') ?
-            await Summary.find({ user: req.userId }).sort({ createdAt: -1 }).exec() :
-            await Summary.find({ user: req.userId }).sort({ createdAt: 1 }).exec()
+        summaries = (mostRecent === 'true') ? // we don't want all the summaries, just the newest or oldest 7
+            await Summary.find({ user: req.userId }).sort({ createdAt: -1 }).limit(7).exec() :
+            await Summary.find({ user: req.userId }).sort({ createdAt: 1 }).limit(7).exec()
     }
     catch (e) {
         return res.status(400).json({ error: 'The following error occurred while getting users summaries: ' + e.message })

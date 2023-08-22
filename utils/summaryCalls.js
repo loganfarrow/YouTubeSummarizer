@@ -26,7 +26,7 @@ export const deleteSummary = async (summaryId, jwt) => {
     .catch((e) => generic_error_handler(e))
 }
 
-// gets all summaries related to current user (in chronological order with option to reverse order if you do mostRecent = false)
+// gets 7 summaries related to current user (in chronological order with option to reverse order if you do mostRecent = false)
 export const fetchSummaries = async (jwt, mostRecent = true) => {
     const queryParams = {mostRecent: mostRecent} // TODO do I have to turn this into a string?
 
