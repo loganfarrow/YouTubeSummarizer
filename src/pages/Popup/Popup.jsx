@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import './Popup.css';
 import { login, register, updateOpenAiKey, fetchUser, updatePassword, updateEmail, deleteUser } from '../../../utils/authenticationCalls'
 import { generateSummary, deleteSummary, fetchSummaries, fetchSummary, findSummary } from '../../../utils/summaryCalls'
+import SummarySelector from './SummarySelector';
 
 const Popup = () => {
-  const [activeView, setActiveView] = useState('settings'); // Current active view (summary, settings, or past-summaries)
+  const [activeView, setActiveView] = useState('past-summaries'); // Current active view (summary, settings, or past-summaries)
 
   // handles the visibility of the login and register form popups
   const [isLoginFormVisible, setIsLoginFormVisible] = useState(false);
@@ -402,9 +403,9 @@ const Popup = () => {
           )}
           {activeView === 'past-summaries' && (
             <div>
-              {/* Your past summaries components */}
               <p>Past Summaries Content</p>
-            </div>
+              <SummarySelector jwtToken={jwtToken} />
+          </div>
           )}
           {isLoginFormVisible && (
             <div className="modal-container">
