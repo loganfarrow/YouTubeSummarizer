@@ -21,7 +21,7 @@ const Popup = () => {
   const [currentSummary, setSummary] = useState({});
 
   // show error messages if login or register failed
-  const [showLoginError , setShowLoginError] = useState(false);
+  const [showLoginError, setShowLoginError] = useState(false);
   const [showRegisterError, setShowRegisterError] = useState(false);
 
   // on the first load, we want to check if there is a jwtToken in local storage and set it if so
@@ -46,7 +46,7 @@ const Popup = () => {
     setIsRegisterFormVisible(true);
   };
 
-  const handleGoToLoginFormClick = (e) => { 
+  const handleGoToLoginFormClick = (e) => {
     e.preventDefault();
     setIsRegisterFormVisible(false);
     setIsLoginFormVisible(true);
@@ -71,11 +71,11 @@ const Popup = () => {
       console.error('Error logging in: ' + responseData.e);
       setShowLoginError(true);
       return;
-    } 
+    }
 
     // if we've successfully logged in we definitely don't want to show the login error anymore
     setShowLoginError(false);
-    
+
     setJwtToken(responseData.token);
 
     // save the token to the local storage
@@ -101,7 +101,7 @@ const Popup = () => {
       console.error('Error registering account: ' + responseData.e);
       setShowRegisterError(true);
       return;
-    } 
+    }
 
     setShowRegisterError(false);
     setJwtToken(responseData.token);
@@ -120,7 +120,7 @@ const Popup = () => {
     if (jwt_token !== null) {
       localStorage.removeItem('jwtToken');
     }
-    
+
     setJwtToken('');
   }
 
@@ -160,8 +160,8 @@ const Popup = () => {
           {activeView === 'summary' && (
             <>
               <div className="textarea-container">
-                <textarea className="textarea custom-textarea" placeholder={jwtToken == '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'" } readOnly>
-                  { isEmpty(currentSummary) ? '' : currentSummary.summary }
+                <textarea className="textarea custom-textarea" placeholder={jwtToken == '' ? "Log in or Create Account to make Summaries" : "Naviagate to a YouTube video and click 'Generate Summary'"} readOnly>
+                  {isEmpty(currentSummary) ? '' : currentSummary.summary}
                 </textarea>
               </div>
               <div className="bottom-button-container">
@@ -182,7 +182,50 @@ const Popup = () => {
           {activeView === 'settings' && (
             <div>
               {/* Your settings components */}
-              <p>Settings Content</p>
+              <div className="control">
+                {/* Length Options */}
+                <label>Length:</label>
+                <label className="radio"><input type="radio" name="length" value="tiny" /></label>
+                <label className="radio"><input type="radio" name="length" value="short" /></label>
+                <label className="radio"><input type="radio" name="length" value="medium" checked /></label>
+                <label className="radio"><input type="radio" name="length" value="long" /></label>
+                <label className="radio"><input type="radio" name="length" value="xlong" /></label>
+
+                {/* Tone Options */}
+                <label>Tone:</label>
+                <label className="radio"><input type="radio" name="tone" value="standard" checked /></label>
+                <label className="radio"><input type="radio" name="tone" value="professional" /></label>
+                <label className="radio"><input type="radio" name="tone" value="academic" /></label>
+                <label className="radio"><input type="radio" name="tone" value="casual" /></label>
+                <label className="radio"><input type="radio" name="tone" value="einstein" /></label>
+                <label className="radio"><input type="radio" name="tone" value="redneck" /></label>
+                <label className="radio"><input type="radio" name="tone" value="dog" /></label>
+
+                {/* Target Age Options */}
+                <label>Target Age:</label>
+                <label className="radio"><input type="radio" name="targetAge" value="unspecified" checked /></label>
+                <label className="radio"><input type="radio" name="targetAge" value="five year old" /></label>
+                <label className="radio"><input type="radio" name="targetAge" value="teenager" /></label>
+                <label className="radio"><input type="radio" name="targetAge" value="college student" /></label>
+                <label className="radio"><input type="radio" name="targetAge" value="adult" /></label>
+
+                {/* Bullet Points Option */}
+                <label>Bullet Points:</label>
+                <label className="radio"><input type="radio" name="bulletPoints" value="true" /></label>
+                <label className="radio"><input type="radio" name="bulletPoints" value="false" checked /></label>
+
+                {/* Paragraph Limit */}
+                <label>Paragraph Limit:</label>
+                <input type="number" name="paragraphLimit" />
+
+                {/* Word Limit */}
+                <label>Word Limit:</label>
+                <input type="number" name="wordLimit" />
+
+                {/* Bullet Point Limit */}
+                <label>Bullet Point Limit:</label>
+                <input type="number" name="bulletPointLimit" />
+              </div>
             </div>
           )}
           {activeView === 'past-summaries' && (
