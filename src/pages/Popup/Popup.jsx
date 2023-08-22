@@ -5,7 +5,7 @@ import { generateSummary, deleteSummary, fetchSummaries, fetchSummary, findSumma
 import SummarySelector from './SummarySelector';
 
 const Popup = () => {
-  const [activeView, setActiveView] = useState('past-summaries'); // Current active view (summary, settings, or past-summaries)
+  const [activeView, setActiveView] = useState('summary'); // Current active view (summary, settings, or past-summaries)
 
   // handles the visibility of the login and register form popups
   const [isLoginFormVisible, setIsLoginFormVisible] = useState(false);
@@ -246,7 +246,7 @@ const Popup = () => {
                         value={isEmpty(currentSummary) ? '' : currentSummary.summary}>
                       </textarea>
                     </div>
-                  </> 
+                  </>
                 ) : (
                   <>
                     <div className="control is-loading">
@@ -257,7 +257,7 @@ const Popup = () => {
                       </textarea>
                     </div>
                   </>
-                  
+
                 )}
               </div>
               {showGenerateSummaryError && (
@@ -405,7 +405,7 @@ const Popup = () => {
             <div>
               <p>Past Summaries Content</p>
               <SummarySelector jwtToken={jwtToken} />
-          </div>
+            </div>
           )}
           {isLoginFormVisible && (
             <div className="modal-container">
