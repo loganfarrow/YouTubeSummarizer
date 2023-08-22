@@ -4,6 +4,7 @@ require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
+const cors = require('cors');
 
 const authenticationRoutes = require('./routes/authentication')
 const summaryRoutes = require('./routes/summaries')
@@ -25,6 +26,8 @@ mongoose.connect(process.env.MONG_URI, {
 // define middleware here (middleware is called on requests in the order it's defined)
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cors());
 
 // debugging middleware to print out any request and method that comes in
 app.use((req, res, next) => {
