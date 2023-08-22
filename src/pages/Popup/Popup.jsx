@@ -3,7 +3,7 @@ import './Popup.css';
 import { login, register, updateOpenAiKey, fetchUser, updatePassword, updateEmail, deleteUser } from '../../../utils/authenticationCalls'
 
 const Popup = () => {
-  const [activeView, setActiveView] = useState('summary'); // Current active view (summary, settings, or past-summaries)
+  const [activeView, setActiveView] = useState('settings'); // Current active view (summary, settings, or past-summaries)
 
   // handles the visibility of the login and register form popups
   const [isLoginFormVisible, setIsLoginFormVisible] = useState(false);
@@ -16,6 +16,12 @@ const Popup = () => {
   const [emailInput, setEmail] = useState('');
   const [passwordInput, setPassword] = useState('');
   const [openAIKeyInput, setOpenAIKey] = useState('');
+
+  const [summaryLength, setSummaryLength] = useState('medium');
+  const [summaryTone, setSummaryTone] = useState('standard');
+  const [summaryToneAge, setSummaryToneAge] = useState('unspecified');
+  const [bulletPoints, setBulletPoints] = useState('false');
+  const [bulletPointLimit, setBulletPointLimit] = useState(1);
 
   // holds representation of the current summary (in JSON format)
   const [currentSummary, setSummary] = useState({});
@@ -180,54 +186,119 @@ const Popup = () => {
             </>
           )}
           {activeView === 'settings' && (
-            <div>
-              {/* Your settings components */}
-              <div className="control">
-                {/* Length Options */}
-                <label>Length:</label>
-                <label className="radio"><input type="radio" name="length" value="tiny" /></label>
-                <label className="radio"><input type="radio" name="length" value="short" /></label>
-                <label className="radio"><input type="radio" name="length" value="medium" checked /></label>
-                <label className="radio"><input type="radio" name="length" value="long" /></label>
-                <label className="radio"><input type="radio" name="length" value="xlong" /></label>
-
-                {/* Tone Options */}
-                <label>Tone:</label>
-                <label className="radio"><input type="radio" name="tone" value="standard" checked /></label>
-                <label className="radio"><input type="radio" name="tone" value="professional" /></label>
-                <label className="radio"><input type="radio" name="tone" value="academic" /></label>
-                <label className="radio"><input type="radio" name="tone" value="casual" /></label>
-                <label className="radio"><input type="radio" name="tone" value="einstein" /></label>
-                <label className="radio"><input type="radio" name="tone" value="redneck" /></label>
-                <label className="radio"><input type="radio" name="tone" value="dog" /></label>
-
-                {/* Target Age Options */}
-                <label>Target Age:</label>
-                <label className="radio"><input type="radio" name="targetAge" value="unspecified" checked /></label>
-                <label className="radio"><input type="radio" name="targetAge" value="five year old" /></label>
-                <label className="radio"><input type="radio" name="targetAge" value="teenager" /></label>
-                <label className="radio"><input type="radio" name="targetAge" value="college student" /></label>
-                <label className="radio"><input type="radio" name="targetAge" value="adult" /></label>
-
-                {/* Bullet Points Option */}
-                <label>Bullet Points:</label>
-                <label className="radio"><input type="radio" name="bulletPoints" value="true" /></label>
-                <label className="radio"><input type="radio" name="bulletPoints" value="false" checked /></label>
-
-                {/* Paragraph Limit */}
-                <label>Paragraph Limit:</label>
-                <input type="number" name="paragraphLimit" />
-
-                {/* Word Limit */}
-                <label>Word Limit:</label>
-                <input type="number" name="wordLimit" />
-
-                {/* Bullet Point Limit */}
-                <label>Bullet Point Limit:</label>
-                <input type="number" name="bulletPointLimit" />
+      <div>
+        <div className="columns control">
+          {/* Summary Length */}
+          <div className="columns">
+            <div className="column is-narrow">
+              <h4 className="title is-5">Summary Length</h4>
+            </div>
+            <div className="column">
+              <div className="field">
+                <p className="control has-icons-left">
+                  <span className="select">
+                  <select name="length" value={summaryLength} onChange={(e) => setSummaryLength(e.target.value)}>
+                      <option value="tiny">Tiny</option>
+                      <option value="short">Short</option>
+                      <option value="medium" selected>Medium</option>
+                      <option value="long">Long</option>
+                      <option value="xlong">Extra Long</option>
+                    </select>
+                  </span>
+                  <span className="icon is-small is-left">
+                    <i className="fas fa-ruler"></i>
+                  </span>
+                </p>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Summary Tone */}
+          <div className="columns">
+            <div className="column is-narrow">
+              <h4 className="title is-5">Summary Tone</h4>
+            </div>
+            <div className="column">
+              <div className="field">
+                <p className="control has-icons-left">
+                  <span className="select">
+                  <select name="tone" value={summaryTone} onChange={(e) => setSummaryTone(e.target.value)}>
+                      <option value="standard" selected>Standard</option>
+                      <option value="professional">Professional</option>
+                      <option value="academic">Academic</option>
+                      <option value="casual">Casual</option>
+                      <option value="einstein">Einstein</option>
+                      <option value="redneck">Redneck</option>
+                      <option value="dog">Dog</option>
+                    </select>
+                  </span>
+                  <span className="icon is-small is-left">
+                    <i className="fas fa-voice"></i>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Tone Age */}
+          <div className="columns">
+            <div className="column is-narrow">
+              <h4 className="title is-5">Summary Tone Age</h4>
+            </div>
+            <div className="column">
+              <div className="field">
+                <p className="control has-icons-left">
+                  <span className="select">
+                  <select name="targetAge" value={summaryToneAge} onChange={(e) => setSummaryToneAge(e.target.value)}>
+                      <option value="unspecified" selected>Unspecified</option>
+                      <option value="five year old">Five Year Old</option>
+                      <option value="teenager">Teenager</option>
+                      <option value="college student">College Student</option>
+                      <option value="adult">Adult</option>
+                    </select>
+                  </span>
+                  <span className="icon is-small is-left">
+                    <i className="fas fa-child"></i>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bullet Points */}
+          <div className="columns">
+            <div className="column is-narrow">
+              <h4 className="title is-5">Bullet Points</h4>
+            </div>
+            <div className="column">
+              <div className="field">
+                <p className="control has-icons-left">
+                  <span className="select">
+                  <select name="bulletPoints" value={bulletPoints} onChange={(e) => setBulletPoints(e.target.value)}>
+                      <option value="true">True</option>
+                      <option value="false" selected>False</option>
+                    </select>
+                  </span>
+                  <span className="icon is-small is-left">
+                    <i className="fas fa-list-ul"></i>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bullet Point Limit */}
+          <div className="columns">
+            <div className="column is-narrow">
+            <h4 className="title is-5">Max Number of Bullet Points</h4>
+            </div>
+            <div className="column">
+            <input type="number" name="bulletPointLimit" min="1" max="15" value={bulletPointLimit} onChange={(e) => setBulletPointLimit(e.target.value)} />
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
           {activeView === 'past-summaries' && (
             <div>
               {/* Your past summaries components */}
