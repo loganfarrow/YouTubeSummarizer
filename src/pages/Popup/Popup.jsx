@@ -98,7 +98,7 @@ const Popup = () => {
     if (responseStatus !== 200) {
       // TODO this should show up in the UI as some sort of error 
       // TODO reconfigure backend to return diff status codes for diff errors (e.g. 401 for bad password, 404 for no user, etc.)
-      console.error('Error registering account: ' + responseData.e);
+      console.error('Error registering account: ' + responseData);
       setShowRegisterError(true);
       return;
     } 
