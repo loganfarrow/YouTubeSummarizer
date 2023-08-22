@@ -4,7 +4,7 @@ const { get_auth_header, generic_error_handler } = require('./misc.js')
 const BACKEND_URL_BASE = "http://localhost:4000/api/summaries"
 
 // returns a success or error message, also returns created summary object (if successful)
-export const generateSummary = async (video_url, options) => {
+export const generateSummary = async (video_url, options, jwt) => {
     return axios.post(`${BACKEND_URL_BASE}/generateSummary`, {
         url: video_url,
         options: options
