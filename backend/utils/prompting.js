@@ -107,7 +107,6 @@ async function getPrompt(options, url) {
         try {
             transcript = await getYoutubeTranscript(url)
         } catch (e) {
-            console.log('getPrompt debug1')
             throw new Error('the following error occurred while getting youtube video transcript: ' + e.message)
         }
     } else {
