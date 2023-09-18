@@ -1,3 +1,15 @@
+# YoutubeSummarizer
+An extension that leverages the power of OpenAI API to provide summaries for YouTube videos based on your personalized preferences. No more annoying tab opening and try to paste into ChatGPT, do it all with a simple click in the YouTubeSummarizer extension!
+
+## Features:
+- Custom Summaries: Get a summarized version of any YouTube video tailored to your preferences.
+- User Preferences: Adjust summary based on tone, age and length.
+- Non-Intrusive: The extension operates discreetly without altering the look and feel of web pages.
+- Clean Dropdown Interface: Built with React and styled using Bulma for a sleek user experience.
+
+
+
+
 # YouTubeSummarizer Backend
 
 ## Setup
@@ -28,15 +40,14 @@ Set up conda env (we need to use a little python to get youtube transcripts)
 
 ## Endpoint Documentation
 ### Endpoints Requiring Authentication
-- TODO explain JWTs and how they are used in this application to handle logging in & out
-- all routes aside from the login and register routes require authentication
+- The application uses JWT tokens to track if you are logged in or out, and can stay logged in everytime you open the browser
+- All routes aside from the login and register routes require authentication
 
-### Authentication Endpoints
-- TODO
 
-### Summary Endpoints
+### Example Summary Endpoints
 - Fetch all summaries from user
   - GET `localhost:PORT/api/summaries/fetchSummaries`
-- TODO for the routes that need a body, put a code block with an example of it
+- Can find copies of all endpoints in the backend code
+
 
 
